@@ -9,27 +9,18 @@ export default function DashboardLayout({
 }: {
     children: React.ReactNode;
 }) {
-
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [open, setOpen] = useState(false);
 
     return (
-        <div className="flex h-screen bg-gray-100">
+        <div className="flex h-screen">
 
-            {/* Sidebar */}
-            <Sidebar open={sidebarOpen} />
-            {sidebarOpen && (
-                <div
-                    className="fixed inset-0 bg-black/40 lg:hidden"
-                    onClick={() => setSidebarOpen(false)}
-                />
-            )}
+            <Sidebar open={open} />
 
-            {/* Main Content */}
             <div className="flex flex-col flex-1 lg:ml-64">
 
-                <Navbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+                <Navbar toggleSidebar={() => setOpen(!open)} />
 
-                <main className="flex-1 p-6 overflow-y-auto">
+                <main className="flex-1 p-6 bg-gray-100 overflow-y-auto">
                     {children}
                 </main>
 

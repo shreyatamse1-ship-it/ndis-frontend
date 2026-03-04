@@ -1,33 +1,34 @@
-"use client";
 
-import { Menu } from "lucide-react";
-
-export default function Navbar({
-    toggleSidebar,
-}: {
+type NavbarProps = {
     toggleSidebar: () => void;
-}) {
+};
+
+export default function Navbar({ toggleSidebar }: NavbarProps) {
     return (
-        <header className="h-14 border-b bg-white flex items-center justify-between px-6">
+        <header className="flex items-center justify-between h-16 px-6 bg-white border-b">
 
-            <div className="flex items-center gap-3">
+            {/* Mobile menu button */}
+            <button
+                onClick={toggleSidebar}
+                className="lg:hidden text-2xl"
+            >
+                ☰
+            </button>
 
-                {/* Mobile menu button */}
-                <button
-                    onClick={toggleSidebar}
-                    className="lg:hidden"
-                >
-                    <Menu size={22} />
+            <h1 className="font-semibold text-lg">
+                Dashboard
+            </h1>
+
+            <div className="flex items-center gap-4 text-sm">
+                <span>Call 1300 73 65 73</span>
+
+                <button className="text-purple-600">
+                    Help centre
                 </button>
 
-                <h1 className="font-semibold text-lg">
-                    Dashboard
-                </h1>
-
-            </div>
-
-            <div>
-                Navbar
+                <button className="border px-3 py-1 rounded">
+                    Logout
+                </button>
             </div>
 
         </header>

@@ -75,7 +75,25 @@ export default function Sidebar({ open }: { open?: boolean }) {
                 <SidebarItem icon={<User size={18} />} label="My clients" href="/my-clients" />
 
                 <SidebarItem icon={<Settings size={18} />} label="Account" href="/account" />
+                <div className="border-t border-blue-200 my-6"></div>
+                <div className="flex flex-col gap-4 text-sm px-4">
 
+                    <button className="flex items-center justify-between text-white/80 hover:bg-white/20 text-white font-medium">
+                        Help
+                        <span>›</span>
+                    </button>
+
+                    <button className="flex items-center justify-between text-white/80 hover:bg-white/20 text-white font-medium">
+                        About us
+                        <span>›</span>
+                    </button>
+
+                    <button className="flex items-center justify-between text-white/80 hover:bg-white/20 text-white font-medium">
+                        Search workers
+                        <span>›</span>
+                    </button>
+
+                </div>
             </nav>
 
         </aside>

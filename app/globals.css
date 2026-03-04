@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+:root {
+  --sidebar-bg: #405189;
+  --sidebar-hover: #364574;
+  --main-bg: #f3f6f9;
+  --card-bg: #ffffff;
+  --border-color: #e9ebec;
+  --primary-btn: #0ab39c;
+}

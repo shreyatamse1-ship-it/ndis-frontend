@@ -1,129 +1,95 @@
-"use client";
+"use client"
 
-import React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import {
-    Home,
+    LayoutDashboard,
     Calendar,
     Briefcase,
     Users,
     Clock,
-    Mail,
-    DollarSign,
+    Inbox,
+    CreditCard,
     User,
-    Settings,
-} from "lucide-react";
-
-export default function Sidebar({ open }: { open?: boolean }) {
-    return (
-        <aside
-            className={`
-  fixed top-0 left-0 z-50
-  h-full w-64
-  bg-[var(--sidebar-bg)]
-  text-white
-  transform transition-transform duration-300 ease-in-out
-  ${open ? "translate-x-0" : "-translate-x-full"}
-  lg:translate-x-0
-`}
-        >
-
-            {/* Badge Card */}
-            <div className="p-4">
-
-                <div className="bg-white/10 rounded-lg p-4">
-
-                    <div className="flex justify-between items-center">
-                        <p className="font-medium">Badge</p>
-                        <span>-</span>
-                    </div>
-
-                    <p className="text-sm text-teal-300 mt-2">
-                        Learn about badges
-                    </p>
-
-                </div>
-
-                {/* Edit profile */}
-                <div className="flex items-center gap-2 mt-4 text-white/80">
-                    ✏️ Edit profile
-                </div>
-
-            </div>
-
-            <div className="border-t border-white/10 my-3"></div>
-
-            {/* Navigation */}
-            <nav className="flex flex-col gap-1 px-4">
-
-                <SidebarItem icon={<Home size={18} />} label="Dashboard" href="/dashboard" />
-
-                <SidebarItem icon={<Calendar size={18} />} label="Manage sessions" href="/sessions" />
-
-                <SidebarItem icon={<Briefcase size={18} />} label="Jobs" href="/jobs" />
-
-                <SidebarItem icon={<Users size={18} />} label="Manage clients" href="/clients" />
-
-                <SidebarItem icon={<Clock size={18} />} label="Support hours" href="/hours" />
-
-                <SidebarItem icon={<Mail size={18} />} label="Inbox" href="/inbox" />
-
-                <SidebarItem icon={<DollarSign size={18} />} label="Billing" href="/billing" />
-
-                <SidebarItem icon={<User size={18} />} label="My clients" href="/my-clients" />
-
-                <SidebarItem icon={<Settings size={18} />} label="Account" href="/account" />
-                <div className="border-t border-blue-200 my-6"></div>
-                <div className="flex flex-col gap-4 text-sm px-4">
-
-                    <button className="flex items-center justify-between text-white/80 hover:bg-white/20 text-white font-medium">
-                        Help
-                        <span>›</span>
-                    </button>
-
-                    <button className="flex items-center justify-between text-white/80 hover:bg-white/20 text-white font-medium">
-                        About us
-                        <span>›</span>
-                    </button>
-
-                    <button className="flex items-center justify-between text-white/80 hover:bg-white/20 text-white font-medium">
-                        Search workers
-                        <span>›</span>
-                    </button>
-
-                </div>
-            </nav>
-
-        </aside>
-    );
+    Settings
+} from "lucide-react"
+type SidebarProps = {
+    open: boolean
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-function SidebarItem({
-    icon,
-    label,
-    href,
-}: {
-    icon: React.ReactNode;
-    label: string;
-    href: string;
-}) {
+export default function Sidebar({ open, setOpen }: SidebarProps) {
 
-    const pathname = usePathname();
-    const isActive = pathname === href;
+    const pathname = usePathname()
+
+    const menu = [
+        { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+        { name: "Manage sessions", href: "/dashboard/manage-sessions", icon: Calendar },
+        { name: "Jobs", href: "/dashboard/jobs", icon: Briefcase },
+        { name: "Manage clients", href: "/dashboard/manage-clients", icon: Users },
+        { name: "Support hours", href: "/dashboard/support-hours", icon: Clock },
+        { name: "Inbox", href: "/dashboard/inbox", icon: Inbox },
+        { name: "Billing", href: "/dashboard/billing", icon: CreditCard },
+        { name: "My clients", href: "/dashboard/my-clients", icon: User },
+        { name: "Account", href: "/dashboard/account", icon: Settings },
+    ]
 
     return (
-        <Link
-            href={href}
-            className={`flex items-center gap-3 px-3 py-2 rounded-md transition cursor-pointer
-        ${isActive
-                    ? "bg-white/20 text-white font-medium"
-                    : "text-white/80 hover:bg-[var(--sidebar-hover)]"
-                }`}
-        >
-            {icon}
-            <span>{label}</span>
-        </Link>
-    );
+        <>
+            {open && (
+                <div
+                    className="fixed inset-0 bg-black/40 z-30 lg:hidden"
+                    onClick={() => setOpen(false)}
+                />
+            )}
+
+            <aside
+                className={`
+        fixed top-0 left-0
+        h-screen w-64
+        bg-[#405189] text-white
+        z-40
+        transform transition-transform duration-300
+        ${open ? "translate-x-0" : "-translate-x-full"}
+        lg:translate-x-0
+        `}
+            >
+
+                <div className="p-6 font-semibold text-lg border-b border-white/20">
+                    Edit profile
+                </div>
+
+                <nav className="flex flex-col gap-2 p-4">
+
+                    {menu.map((item) => {
+
+                        const Icon = item.icon
+                        const active = pathname === item.href
+
+                        return (
+                            <Link
+                                key={item.name}
+                                href={item.href}
+                                className={`
+                flex items-center gap-3
+                px-4 py-2 rounded-md
+                transition-all duration-200
+
+                ${active
+                                        ? "bg-white/20 shadow-md"
+                                        : "hover:bg-white/10 hover:shadow-md"
+                                    }
+                `}
+                            >
+                                <Icon size={18} />
+                                {item.name}
+                            </Link>
+                        )
+                    })}
+
+                </nav>
+
+            </aside>
+        </>
+    )
 }

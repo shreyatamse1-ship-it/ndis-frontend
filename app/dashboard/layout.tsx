@@ -1,31 +1,35 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import Sidebar from "../../components/layout/Sidebar";
-import Navbar from "../../components/layout/Navbar";
+import { useState } from "react"
+import Sidebar from "../../components/layout/Sidebar"
+import Navbar from "../../components/layout/Navbar"
 
 export default function DashboardLayout({
     children,
 }: {
-    children: React.ReactNode;
+    children: React.ReactNode
 }) {
-    const [open, setOpen] = useState(false);
+
+    const [open, setOpen] = useState(false)
 
     return (
-        <div className="flex h-screen">
+        <div className="min-h-screen bg-gray-100">
 
-            <Sidebar open={open} />
+            {/* Sidebar */}
+            <Sidebar open={open} setOpen={setOpen} />
 
-            <div className="flex flex-col flex-1 lg:ml-64">
+            {/* Main Content */}
+            <div className="lg:ml-64 flex flex-col min-h-screen">
 
+                {/* Navbar */}
                 <Navbar toggleSidebar={() => setOpen(!open)} />
 
-                <main className="flex-1 p-6 bg-gray-100 overflow-y-auto">
+                {/* Page Content */}
+                <main className="flex-1 p-6">
                     {children}
                 </main>
 
             </div>
-
         </div>
-    );
+    )
 }

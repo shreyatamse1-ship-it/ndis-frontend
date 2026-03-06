@@ -3,7 +3,7 @@ import Card from "../../../components/ui/Card"
 
 export default function DashboardPage() {
     return (
-        <div className="w-full bg-gray-50 min-h-screen space-y-8">
+        <div className="w-full space-y-8">
 
             {/* Page Title */}
             <h1 className="text-2xl font-semibold text-gray-800">
@@ -11,24 +11,23 @@ export default function DashboardPage() {
             </h1>
 
             {/* Stat Cards */}
-            <div className="grid grid-cols-4 gap-6">
-
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard title="Total Jobs" value="119" />
                 <StatCard title="Active Jobs" value="42" />
                 <StatCard title="Applications" value="892" />
                 <StatCard title="Candidates" value="310" />
-
             </div>
 
-            {/* Job Search Section */}
+            {/* Search Section */}
             <Card title="Suburb or postcode">
 
-                <div className="flex gap-4">
+                {/* Search Input */}
+                <div className="flex flex-col md:flex-row gap-4">
 
                     <input
                         type="text"
                         placeholder="Where would you like to work?"
-                        className="flex-1 border border-gray-300 rounded-lg px-4 py-3"
+                        className="w-full md:flex-1 border border-gray-300 rounded-lg px-4 py-3"
                     />
 
                     <button className="bg-teal-500 text-white px-6 py-3 rounded-lg hover:bg-teal-600 transition">
@@ -37,15 +36,16 @@ export default function DashboardPage() {
 
                 </div>
 
-                <div className="mt-4 flex items-center gap-2 text-gray-600">
-
+                {/* Checkbox */}
+                <div className="flex items-center gap-2 mt-4">
                     <input type="checkbox" defaultChecked />
-
-                    <span>Include nearby suburbs</span>
-
+                    <span className="text-sm text-gray-700">
+                        Include nearby suburbs
+                    </span>
                 </div>
 
-                <div className="flex gap-3 mt-4">
+                {/* Filters */}
+                <div className="flex flex-wrap gap-3 mt-4">
 
                     <button className="border border-gray-300 px-4 py-2 rounded-lg">
                         Services
@@ -67,25 +67,25 @@ export default function DashboardPage() {
 
             </Card>
 
-            {/* Job Results Section */}
+            {/* Job Results */}
             <Card>
 
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 gap-2">
 
                     <p className="text-gray-700 font-medium">
                         119 jobs match all your filters
                     </p>
 
-                    <p className="text-gray-500">
+                    <p className="text-gray-500 text-sm">
                         Sort by: Most recent
                     </p>
 
                 </div>
 
-                {/* Example Job Card */}
+                {/* Job Card */}
+                <div className="border rounded-xl p-6 flex flex-col md:flex-row md:justify-between gap-6">
 
-                <div className="border rounded-xl p-6 flex justify-between">
-
+                    {/* Left Content */}
                     <div>
 
                         <p className="font-semibold text-gray-800">
@@ -106,7 +106,8 @@ export default function DashboardPage() {
 
                     </div>
 
-                    <div className="text-gray-600">
+                    {/* Right Content */}
+                    <div className="text-gray-600 md:text-right">
 
                         <p className="font-medium mb-2">
                             Currently available:

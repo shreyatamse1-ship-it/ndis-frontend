@@ -2,10 +2,10 @@ import TestimonialSection from "../../components/common/TestimonialSection";
 
 export default function DashboardPage() {
     return (
-        <div className="space-y-10">
+        <div className="space-y-10 w-full max-w-7xl mx-auto">
 
             {/* Top section */}
-            <div className="flex flex-col lg:flex-row justify-between gap-10">
+            <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-10">
 
                 {/* Left side */}
                 <div>

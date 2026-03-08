@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
+    Pencil,
     LayoutDashboard,
     Calendar,
     Briefcase,
@@ -24,6 +25,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
     const pathname = usePathname()
 
     const menu = [
+        { name: "Edit profile", href: "/dashboard/edit-profile", icon: Pencil },
         { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
         { name: "Manage sessions", href: "/dashboard/sessions", icon: Calendar },
         { name: "Jobs", href: "/dashboard/jobs", icon: Briefcase },
@@ -34,6 +36,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
         { name: "My clients", href: "/dashboard/myclients", icon: User },
         { name: "Account", href: "/dashboard/account", icon: Settings },
     ]
+
 
     return (
         <>
@@ -85,6 +88,33 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                             </Link>
                         )
                     })}
+                    <div className="border-t border-white/20 p-4 flex flex-col gap-3 text-sm">
+
+                        <a
+                            href="#"
+                            className="flex justify-between items-center hover:text-gray-200"
+                        >
+                            Help
+                            <span>›</span>
+                        </a>
+
+                        <a
+                            href="#"
+                            className="flex justify-between items-center hover:text-gray-200"
+                        >
+                            About us
+                            <span>›</span>
+                        </a>
+
+                        <a
+                            href="#"
+                            className="flex justify-between items-center hover:text-gray-200"
+                        >
+                            Search workers
+                            <span>›</span>
+                        </a>
+
+                    </div>
 
                 </nav>
 

@@ -16,7 +16,7 @@ export default function PreferredHoursPage() {
                 </div>
 
                 {/* Main content */}
-                <div className="flex-1 bg-white border rounded-lg shadow-sm p-6">
+                <div className="flex-1 bg-white border border-gray-200 rounded-lg shadow-sm p-6">
 
                     <h2 className="text-xl font-semibold mb-3">
                         Preferred hours

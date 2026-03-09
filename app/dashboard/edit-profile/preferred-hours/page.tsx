@@ -78,7 +78,7 @@ export default function PreferredHoursPage() {
                 </div>
 
                 {/* Main Card */}
-                <div className="flex-1 bg-white border rounded-lg shadow-sm p-6">
+                <div className="flex-1 bg-white border border-gray-200 rounded-lg shadow-sm p-6">
 
                     {/* Header */}
                     <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">

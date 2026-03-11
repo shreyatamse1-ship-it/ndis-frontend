@@ -1,4 +1,5 @@
 import TestimonialSection from "../../components/common/TestimonialSection";
+import Link from "next/link"
 
 export default function DashboardPage() {
     return (
@@ -17,9 +18,12 @@ export default function DashboardPage() {
                         Let's get you started to find jobs and build a network of clients.
                     </p>
 
-                    <button className="mt-6 bg-teal-500 text-white px-6 py-3 rounded-lg">
-                        Set up your account
-                    </button>
+                    <Link href="/dashboard/setup-account">
+                        <button className="mt-6 bg-teal-500 text-white px-6 py-3 rounded-lg hover:bg-teal-600 transition">
+                            Set up your account
+                        </button>
+                    </Link>
+
                 </div>
 
                 {/* Setup card */}

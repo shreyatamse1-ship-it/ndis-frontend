@@ -19,14 +19,12 @@ export default function EducationTrainingPage() {
     return (
         <div className="min-h-screen bg-gray-50 p-6">
 
-            {/* Page Title */}
             <h1 className="text-2xl font-semibold mb-6">My profile</h1>
 
-            {/* Layout */}
-            <div className="flex flex-col lg:flex-row gap-6">
+            <div className="flex flex-col md:flex-row gap-6">
 
                 {/* Sidebar */}
-                <div className="w-full lg:w-72">
+                <div className="w-full md:w-72">
                     <ProfileSidebar />
                 </div>
 
@@ -39,98 +37,71 @@ export default function EducationTrainingPage() {
 
                     {courses.map((_, index) => (
 
-                        <div
-                            key={index}
-                            className="space-y-5 mb-10 border-b pb-6"
-                        >
+                        <div key={index} className="mb-10 border-b pb-6">
 
                             {/* Institution */}
-                            <div>
-                                <label className="font-medium">Institution</label>
-                                <input
-                                    type="text"
-                                    className="w-full border border-gray-200 rounded-md p-3 mt-2"
-                                />
-                            </div>
+                            <label className="font-medium">Institution</label>
+                            <input
+                                type="text"
+                                className="w-full border border-gray-200 rounded-md p-3 mt-2 mb-5"
+                            />
 
                             {/* Degree */}
-                            <div>
-                                <label className="font-medium">Degree/Course</label>
-                                <input
-                                    type="text"
-                                    className="w-full border border-gray-200 rounded-md p-3 mt-2"
-                                />
-                            </div>
+                            <label className="font-medium">Degree/Course</label>
+                            <input
+                                type="text"
+                                className="w-full border border-gray-200 rounded-md p-3 mt-2 mb-5"
+                            />
 
                             {/* Start Date */}
-                            <div>
-                                <h3 className="font-semibold mb-2">Start date</h3>
+                            <h3 className="font-semibold mb-2">Start date</h3>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-4 mb-6">
 
-                                    <select className="w-full border border-gray-200 rounded-md p-3">
-                                        <option>Month</option>
-                                        <option>January</option>
-                                        <option>February</option>
-                                        <option>March</option>
-                                        <option>April</option>
-                                        <option>May</option>
-                                        <option>June</option>
-                                        <option>July</option>
-                                        <option>August</option>
-                                        <option>September</option>
-                                        <option>October</option>
-                                        <option>November</option>
-                                        <option>December</option>
-                                    </select>
+                                <select className="border border-gray-200 rounded-md p-3">
+                                    <option>Month</option>
+                                    <option>January</option>
+                                    <option>February</option>
+                                    <option>March</option>
+                                </select>
 
-                                    <input
-                                        type="number"
-                                        placeholder="Year"
-                                        className="w-full border border-gray-200 rounded-md p-3"
-                                    />
+                                <input
+                                    type="number"
+                                    placeholder="Year"
+                                    className="border border-gray-200 rounded-md p-3"
+                                />
 
-                                </div>
                             </div>
 
                             {/* End Date */}
-                            <div>
-                                <h3 className="font-semibold mb-2">End date</h3>
 
-                                <label className="flex items-center gap-2 mb-4">
-                                    <input type="checkbox" />
-                                    I am currently working in this course
-                                </label>
+                            <h3 className="font-semibold mb-2">End date</h3>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <label className="flex items-center gap-2 mb-4">
+                                <input type="checkbox" />
+                                I am currently working in this course
+                            </label>
 
-                                    <select className="w-full border border-gray-200 rounded-md p-3">
-                                        <option>Month</option>
-                                        <option>January</option>
-                                        <option>February</option>
-                                        <option>March</option>
-                                        <option>April</option>
-                                        <option>May</option>
-                                        <option>June</option>
-                                        <option>July</option>
-                                        <option>August</option>
-                                        <option>September</option>
-                                        <option>October</option>
-                                        <option>November</option>
-                                        <option>December</option>
-                                    </select>
+                            <div className="grid grid-cols-2 gap-4">
 
-                                    <input
-                                        type="number"
-                                        placeholder="Year"
-                                        className="w-full border border-gray-200 rounded-md p-3"
-                                    />
+                                <select className="border border-gray-200 rounded-md p-3">
+                                    <option>Month</option>
+                                    <option>January</option>
+                                    <option>February</option>
+                                    <option>March</option>
+                                </select>
 
-                                </div>
+                                <input
+                                    type="number"
+                                    placeholder="Year"
+                                    className="border border-gray-200 rounded-md p-3"
+                                />
+
                             </div>
 
-                            {/* Delete Course */}
-                            <div className="flex justify-end">
+                            {/* Delete */}
+
+                            <div className="flex justify-end mt-6">
 
                                 <button
                                     onClick={() => deleteCourse(index)}
@@ -146,16 +117,18 @@ export default function EducationTrainingPage() {
                     ))}
 
                     {/* Save Button */}
-                    <button className="bg-teal-200 hover:bg-teal-500 text-gray-900 px-10 py-4 rounded-lg font-semibold transition mb-6">
+
+                    <button className="bg-teal-200 text-gray-900 px-8 py-3 rounded-md mb-6">
                         Save and continue
                     </button>
 
                     {/* Add Course */}
+
                     <div>
 
                         <button
                             onClick={addCourse}
-                            className="border-2 border-purple-600 text-purple-600 px-10 py-3 rounded-lg font-semibold hover:bg-purple-50 transition"
+                            className="border-2 border-purple-600 text-purple-600 px-8 py-3 rounded-md"
                         >
                             Add course
                         </button>

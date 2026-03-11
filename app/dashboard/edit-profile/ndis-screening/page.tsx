@@ -27,7 +27,7 @@ export default function NDISWorkerScreeningPage() {
                 <p className="text-gray-600 max-w-3xl">
                     The NDIS Worker Screening Check (NDIS WSC) is a national assessment
                     recognised in the NDIS and Aged Care sectors. This check is mandatory
-                    on Mable.
+                    on Melora.
                 </p>
 
 
@@ -73,7 +73,7 @@ export default function NDISWorkerScreeningPage() {
 
                 {/* BUTTON */}
 
-                <button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3 rounded-lg transition">
+                <button className="bg-teal-200 hover:bg-teal-400 text-gray-900 font-semibold px-6 py-3 rounded-lg transition">
                     Provide NDIS WSC
                 </button>
 

@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Force Tailwind layers */
+@layer base {
+}
+
 :root {
   --sidebar-bg: #405189;
   --sidebar-hover: #364574;

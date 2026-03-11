@@ -79,7 +79,7 @@ export default function InterestsHobbiesPage() {
                     </div>
 
                     {/* Save button */}
-                    <button className="mt-8 bg-teal-400 hover:bg-teal-500 text-gray-900 px-6 py-3 rounded-lg">
+                    <button className="mt-8 bg-teal-200 hover:bg-teal-500 text-gray-900 px-6 py-3 rounded-lg">
                         Save and continue
                     </button>
 

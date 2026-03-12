@@ -88,6 +88,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                             </Link>
                         )
                     })}
+
                     <div className="border-t border-white/20 p-4 flex flex-col gap-3 text-sm">
 
                         <a

@@ -1,128 +1,205 @@
-import StatCard from "../../../components/dashboard/StatCard"
-import Card from "../../../components/ui/Card"
+"use client";
 
-export default function DashboardPage() {
+import { useState } from "react";
+import Link from "next/link";
+
+export default function JobsPage() {
+    const [activeDropdown, setActiveDropdown] = useState("");
+
+    const toggleDropdown = (name: string) => {
+        setActiveDropdown(activeDropdown === name ? "" : name);
+    };
+
     return (
-        <div className="w-full space-y-8">
+        <div className="p-6 space-y-6">
 
-            {/* Page Title */}
-            <h1 className="text-2xl font-semibold text-gray-800">
-                Dashboard
-            </h1>
+            {/* DASHBOARD CARDS */}
 
-            {/* Stat Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard title="Total Jobs" value="119" />
-                <StatCard title="Active Jobs" value="42" />
-                <StatCard title="Applications" value="892" />
-                <StatCard title="Candidates" value="310" />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+                <div className="bg-white rounded-xl shadow p-6">
+                    <p className="text-gray-500">Total Jobs</p>
+                    <h2 className="text-2xl font-bold">119</h2>
+                </div>
+
+                <div className="bg-white rounded-xl shadow p-6">
+                    <p className="text-gray-500">Active Jobs</p>
+                    <h2 className="text-2xl font-bold">42</h2>
+                </div>
+
+                <div className="bg-white rounded-xl shadow p-6">
+                    <p className="text-gray-500">Applications</p>
+                    <h2 className="text-2xl font-bold">892</h2>
+                </div>
+
+                <div className="bg-white rounded-xl shadow p-6">
+                    <p className="text-gray-500">Candidates</p>
+                    <h2 className="text-2xl font-bold">310</h2>
+                </div>
+
             </div>
 
-            {/* Search Section */}
-            <Card title="Suburb or postcode">
 
-                {/* Search Input */}
-                <div className="flex flex-col md:flex-row gap-4">
+            {/* SEARCH CARD */}
 
+            <div className="bg-white rounded-xl shadow p-6">
+
+                <h3 className="font-semibold mb-4">Suburb or postcode</h3>
+
+                <div className="flex gap-3 mb-3">
                     <input
-                        type="text"
+                        className="border rounded-lg p-3 flex-1"
                         placeholder="Where would you like to work?"
-                        className="w-full md:flex-1 border border-gray-300 rounded-lg px-4 py-3"
                     />
 
-                    <button className="bg-teal-500 text-white px-6 py-3 rounded-lg hover:bg-teal-600 transition">
+                    <button className="bg-teal-500 text-white px-6 rounded-lg">
                         Search
                     </button>
-
                 </div>
 
-                {/* Checkbox */}
-                <div className="flex items-center gap-2 mt-4">
+                <label className="flex gap-2 mb-4">
                     <input type="checkbox" defaultChecked />
-                    <span className="text-sm text-gray-700">
-                        Include nearby suburbs
-                    </span>
-                </div>
+                    Include nearby suburbs
+                </label>
 
-                {/* Filters */}
-                <div className="flex flex-wrap gap-3 mt-4">
 
-                    <button className="border border-gray-300 px-4 py-2 rounded-lg">
+                {/* FILTER BUTTONS */}
+
+                <div className="flex flex-wrap gap-3">
+
+                    <button
+                        onClick={() => toggleDropdown("services")}
+                        className="border px-4 py-2 rounded-lg"
+                    >
                         Services
                     </button>
 
-                    <button className="border border-gray-300 px-4 py-2 rounded-lg">
+                    <button
+                        onClick={() => toggleDropdown("days")}
+                        className="border px-4 py-2 rounded-lg"
+                    >
                         Days
                     </button>
 
-                    <button className="border border-gray-300 px-4 py-2 rounded-lg">
+                    <button
+                        onClick={() => toggleDropdown("hours")}
+                        className="border px-4 py-2 rounded-lg"
+                    >
                         Hours per week
                     </button>
 
-                    <button className="border border-gray-300 px-4 py-2 rounded-lg">
-                        All filters
-                    </button>
+
+                    {/* THIS IS THE IMPORTANT FIX */}
+
+                    <Link href="/dashboard/jobs/all-filters">
+                        <button className="border px-4 py-2 rounded-lg">
+                            All filters
+                        </button>
+                    </Link>
 
                 </div>
 
-            </Card>
+            </div>
 
-            {/* Job Results */}
-            <Card>
 
-                <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 gap-2">
+            {/* SERVICES DROPDOWN */}
 
-                    <p className="text-gray-700 font-medium">
-                        119 jobs match all your filters
-                    </p>
+            {activeDropdown === "services" && (
+                <div className="bg-white rounded-xl shadow p-6 grid md:grid-cols-2 gap-3">
 
-                    <p className="text-gray-500 text-sm">
-                        Sort by: Most recent
-                    </p>
-
-                </div>
-
-                {/* Job Card */}
-                <div className="border rounded-xl p-6 flex flex-col md:flex-row md:justify-between gap-6">
-
-                    {/* Left Content */}
-                    <div>
-
-                        <p className="font-semibold text-gray-800">
-                            Friendly and patient support worker needed
-                        </p>
-
-                        <p className="text-gray-500 mt-2">
-                            Weekly • 20 hours • 4 sessions
-                        </p>
-
-                        <p className="text-gray-500 mt-2">
-                            Putney NSW 2112 • ~29 min drive
-                        </p>
-
-                        <p className="text-sm text-gray-400 mt-2">
-                            Posted 3 days ago • 10+ applications
-                        </p>
-
-                    </div>
-
-                    {/* Right Content */}
-                    <div className="text-gray-600 md:text-right">
-
-                        <p className="font-medium mb-2">
-                            Currently available:
-                        </p>
-
-                        <p>Mon: 6-9am</p>
-                        <p>Wed: 6-9am</p>
-                        <p>Thu: 6-9am</p>
-
-                    </div>
+                    {[
+                        "Companionship and social support",
+                        "Transportation",
+                        "Light housework",
+                        "Personal admin and home maintenance",
+                        "Manual transfer and mobility",
+                        "Assistance with eating",
+                        "Nursing services",
+                        "Occupational therapy",
+                        "Speech pathology",
+                        "Community participation",
+                        "Meal delivery and shopping",
+                        "Light gardening",
+                        "Showering and dressing",
+                        "Assistance with medication",
+                    ].map((service) => (
+                        <label key={service} className="flex gap-2">
+                            <input type="checkbox" />
+                            {service}
+                        </label>
+                    ))}
 
                 </div>
+            )}
 
-            </Card>
+
+            {/* DAYS DROPDOWN */}
+
+            {activeDropdown === "days" && (
+                <div className="bg-white rounded-xl shadow p-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+
+                    {[
+                        "Monday",
+                        "Tuesday",
+                        "Wednesday",
+                        "Thursday",
+                        "Friday",
+                        "Saturday",
+                        "Sunday",
+                    ].map((day) => (
+                        <label key={day} className="flex gap-2">
+                            <input type="checkbox" />
+                            {day}
+                        </label>
+                    ))}
+
+                </div>
+            )}
+
+
+            {/* HOURS DROPDOWN */}
+
+            {activeDropdown === "hours" && (
+                <div className="bg-white rounded-xl shadow p-6 space-y-3">
+
+                    {[
+                        "Less than 5 hours",
+                        "5 to 10 hours",
+                        "10 to 20 hours",
+                        "More than 20 hours",
+                    ].map((h) => (
+                        <label key={h} className="flex gap-2">
+                            <input type="radio" name="hours" />
+                            {h}
+                        </label>
+                    ))}
+
+                </div>
+            )}
+
+
+            {/* JOB CARD */}
+
+            <div className="bg-white rounded-xl shadow p-6 border">
+
+                <h3 className="font-semibold mb-2">
+                    Friendly and patient support worker needed
+                </h3>
+
+                <p className="text-gray-600">
+                    Weekly • 20 hours • 4 sessions
+                </p>
+
+                <p className="text-gray-500">
+                    Putney NSW 2112 • ~29 min drive
+                </p>
+
+                <p className="text-gray-400 text-sm">
+                    Posted 3 days ago • 10+ applications
+                </p>
+
+            </div>
 
         </div>
-    )
+    );
 }

@@ -1,10 +1,18 @@
 "use client"
 
+import { useRouter } from "next/navigation"
+
 type NavbarProps = {
     toggleSidebar: () => void
 }
 
 export default function Navbar({ toggleSidebar }: NavbarProps) {
+
+    const router = useRouter()
+    const handleLogout = () => {
+        localStorage.removeItem("isLoggedIn")
+        router.push("/login")
+    }
 
     return (
         <div className="flex items-center justify-between bg-white px-4 md:px-6 py-3 border-b">
@@ -29,7 +37,10 @@ export default function Navbar({ toggleSidebar }: NavbarProps) {
                     Help centre
                 </button>
 
-                <button className="border px-3 py-1 rounded">
+                <button
+                    onClick={handleLogout}
+                    className="border px-3 py-1 rounded"
+                >
                     Logout
                 </button>
 

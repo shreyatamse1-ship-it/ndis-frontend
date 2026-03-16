@@ -24,7 +24,8 @@ export async function POST(req: Request) {
     );
 
     return Response.json({
-      message: "User saved successfully",
+      success: true,
+      message: "User created successfully",
     });
   } catch (error) {
     console.error(error);

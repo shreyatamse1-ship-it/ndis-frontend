@@ -1,15 +1,25 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import Sidebar from "../../components/layout/Sidebar"
 import Navbar from "../../components/layout/Navbar"
-
 export default function DashboardLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
+
+    const router = useRouter()
+
     const [open, setOpen] = useState(false)
+    useEffect(() => {
+        const isLoggedIn = localStorage.getItem("isLoggedIn")
+
+        if (!isLoggedIn) {
+            router.push("/login")
+        }
+    }, [])
 
     return (
         <div className="flex min-h-screen bg-gray-100">

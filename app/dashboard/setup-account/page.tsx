@@ -20,6 +20,36 @@ export default function SetupAccountPage() {
             [e.target.name]: e.target.value
         })
     }
+    const handleSave = async () => {
+        const res = await fetch("/api/users", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                name: formData.name,
+                email: formData.email,
+                password: formData.password,
+                phone: formData.phone,
+                date_of_birth: formData.dob,
+                address: formData.address,
+                about_me: formData.about,
+            }),
+        });
+
+        const data = await res.json();
+        alert(data.message);
+
+        setFormData({
+            name: "",
+            email: "",
+            password: "",
+            phone: "",
+            dob: "",
+            address: "",
+            about: ""
+        });
+    };
 
     return (
         <div className="w-full p-6 bg-gray-50 min-h-screen">
@@ -153,8 +183,10 @@ export default function SetupAccountPage() {
 
                 {/* Buttons */}
                 <div className="flex gap-4 mt-8">
-
-                    <button className="bg-teal-200 hover:bg-teal-400 text-gray-900 px-6 py-3 rounded-lg transition">
+                    <button
+                        onClick={handleSave}
+                        className="bg-teal-200 hover:bg-teal-400 text-gray-900 px-6 py-3 rounded-lg"
+                    >
                         Save
                     </button>
 

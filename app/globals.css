@@ -12,3 +12,10 @@
   --border-color: #e9ebec;
   --primary-btn: #0ab39c;
 }
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}

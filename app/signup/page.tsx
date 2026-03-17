@@ -13,7 +13,7 @@ export default function Signup() {
 
                 <h1 className="text-3xl font-bold mb-2">Welcome!</h1>
                 <p className="text-gray-600 mb-8">
-                    What brings you to Melora?
+                    What brings you to Melore?
                 </p>
 
                 <div className="flex flex-col gap-4">

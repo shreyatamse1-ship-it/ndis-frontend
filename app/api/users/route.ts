@@ -13,14 +13,36 @@ export async function POST(req: Request) {
 
     const { name, email, password, phone, date_of_birth, address, about_me } =
       body;
-    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // convert empty date to null
     const dob = date_of_birth || null;
 
+    // check if email already exists
+    const [existing]: any = await db.execute(
+      "SELECT id FROM users WHERE email = ?",
+      [email],
+    );
+
+    if (existing.length > 0) {
+      return Response.json(
+        { error: "Email already registered" },
+        { status: 400 },
+      );
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     await db.execute(
-      "INSERT INTO users (name,email,password,phone,date_of_birth,address,about_me) VALUES (?,?,?,?,?,?,?)",
-      [name, email, hashedPassword, phone, dob, address, about_me],
+      `INSERT INTO users (name,email,password,phone,date_of_birth,address,about_me)
+       VALUES (?,?,?,?,?,?,?)`,
+      [
+        name,
+        email,
+        hashedPassword,
+        phone,
+        dob || null,
+        address || null,
+        about_me || null,
+      ],
     );
 
     return Response.json({

@@ -1,24 +1,56 @@
 "use client";
-
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function FindSupport() {
+    const router = useRouter();
 
-    const [step, setStep] = useState(1)
+    const [step, setStep] = useState(1);
 
     const [formData, setFormData] = useState({
         email: "",
-        firstName: "",
-        lastName: "",
-        age: "",
-        funding: "",
-        suburb: "",
-        startTime: "",
         accountFirstName: "",
         accountLastName: "",
         phone: "",
-        password: ""
-    })
+        password: "",
+    });
+
+
+
+    const handleSubmit = async () => {
+        console.log("FINAL DATA:", formData); // 🔍 DEBUG
+
+        const userData = {
+            name: formData.accountFirstName + " " + formData.accountLastName,
+            email: formData.email,
+            password: formData.password,
+            phone: formData.phone,
+        };
+
+        try {
+            const res = await fetch("/api/users", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(userData),
+            });
+
+            const data = await res.json();
+            console.log("RESPONSE:", data);
+
+            if (res.ok) {
+                alert("Account created successfully");
+                router.push("/dashboard");
+            } else {
+                alert(data.error);
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Server error");
+        }
+    };
+
 
     return (
 
@@ -71,8 +103,11 @@ export default function FindSupport() {
 
                         <input
                             type="email"
+                            placeholder="Enter email"
                             value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            onChange={(e) =>
+                                setFormData({ ...formData, email: e.target.value })
+                            }
                             className="border p-3 w-full mb-6"
                         />
 
@@ -95,15 +130,19 @@ export default function FindSupport() {
 
                         <input
                             placeholder="First name"
-                            value={formData.firstName}
-                            onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                            value={formData.accountFirstName}
+                            onChange={(e) =>
+                                setFormData({ ...formData, accountFirstName: e.target.value })
+                            }
                             className="border p-3 w-full mb-4"
                         />
 
                         <input
                             placeholder="Last name"
-                            value={formData.lastName}
-                            onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                            value={formData.accountLastName}
+                            onChange={(e) =>
+                                setFormData({ ...formData, accountLastName: e.target.value })
+                            }
                             className="border p-3 w-full mb-6"
                         />
 
@@ -275,37 +314,31 @@ export default function FindSupport() {
                 {/* STEP 8 */}
 
                 {step === 8 && (
+
                     <>
+
                         <h2 className="text-2xl font-bold mb-6">
-                            Add account holder’s details
+                            Create your account
                         </h2>
 
                         <input
-                            placeholder="First name"
+                            placeholder="Account first name"
                             value={formData.accountFirstName}
                             onChange={(e) => setFormData({ ...formData, accountFirstName: e.target.value })}
                             className="border p-3 w-full mb-4"
                         />
 
                         <input
-                            placeholder="Last name"
+                            placeholder="Account last name"
                             value={formData.accountLastName}
                             onChange={(e) => setFormData({ ...formData, accountLastName: e.target.value })}
                             className="border p-3 w-full mb-4"
                         />
 
                         <input
-                            placeholder="Mobile number"
+                            placeholder="Phone"
                             value={formData.phone}
                             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            className="border p-3 w-full mb-4"
-                        />
-
-                        <input
-                            type="email"
-                            placeholder="Email"
-                            value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                             className="border p-3 w-full mb-4"
                         />
 
@@ -317,15 +350,32 @@ export default function FindSupport() {
                             className="border p-3 w-full mb-6"
                         />
 
-                        <button className="bg-teal-200 text-gray-900 px-6 py-3 rounded">
+                        <button
+                            onClick={handleSubmit}
+                            className="bg-teal-400 px-6 py-3 rounded"
+                        >
                             Create Account
                         </button>
+                        {step === 8 && (
+                            <>
+
+
+                                <button
+                                    className="nextBtn"
+                                    onClick={() => router.push("/dashboard")}
+                                >
+
+                                </button>
+                            </>
+                        )}
 
                     </>
+
                 )}
+
 
             </div>
 
-        </div>
+        </div >
     )
 }

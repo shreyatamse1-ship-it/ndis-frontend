@@ -27,50 +27,37 @@ export default function ProvideSupport() {
 
     }
     const handleSubmit = async () => {
-
         try {
+            const res = await fetch(
+                "http://localhost/ndis-backend/index.php?route=provider_signup",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        first_name: formData.firstName,
+                        last_name: formData.lastName,
+                        email: formData.email,
+                        password: formData.password,
+                        phone: formData.mobile,
+                    }),
+                }
+            );
 
-            const userData = {
-                name: formData.firstName + " " + formData.lastName,
-                email: formData.email,
-                password: formData.password,
-                phone: formData.mobile,
-                date_of_birth: null,
-                address: "",
-                about_me: ""
-            }
+            const data = await res.json();
 
-            const res = await fetch("/api/users", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(userData)
-            })
-
-            const data = await res.json()
-
-            if (res.ok) {
-
-                alert("Account created successfully")
-
-                router.push("/dashboard")
-
+            if (data.success) {
+                alert("Account created successfully 🚀");
+                router.push("/dashboard");
             } else {
-
-                alert(data.error)
-
+                alert(data.message || "Signup failed");
             }
-
         } catch (error) {
-
-            console.error(error)
-            alert("Server error")
-
+            console.error(error);
+            alert("Server error");
         }
-
-    }
-
+    };
 
 
     return (

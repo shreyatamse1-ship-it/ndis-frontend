@@ -13,44 +13,48 @@ export default function FindSupport() {
         accountLastName: "",
         phone: "",
         password: "",
+        age: "",
+        funding: "",
+        suburb: "",
+        startTime: ""
     });
+    const handleChange = (e: any) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value,
+        });
+    };
 
-
-
-    const handleSubmit = async () => {
-        console.log("FINAL DATA:", formData); // 🔍 DEBUG
-
-        const userData = {
-            name: formData.accountFirstName + " " + formData.accountLastName,
-            email: formData.email,
-            password: formData.password,
-            phone: formData.phone,
-        };
-
+    const handleSignup = async () => {
         try {
-            const res = await fetch("/api/users", {
+            const res = await fetch("http://localhost/ndis-backend/index.php?route=signup", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
+                    "Content-Type": "application/json"
                 },
-                body: JSON.stringify(userData),
+                body: JSON.stringify({
+                    firstName: formData.accountFirstName,
+                    lastName: formData.accountLastName,
+                    email: formData.email,
+                    phone: formData.phone,
+                    password: formData.password
+                })
             });
 
             const data = await res.json();
-            console.log("RESPONSE:", data);
 
-            if (res.ok) {
-                alert("Account created successfully");
+            if (data.success) {
+                alert("Signup successful");
+                localStorage.setItem("email", formData.email);
                 router.push("/dashboard");
             } else {
-                alert(data.error);
+                alert(data.error || "Something went wrong");
             }
         } catch (error) {
             console.error(error);
             alert("Server error");
         }
     };
-
 
     return (
 
@@ -351,7 +355,7 @@ export default function FindSupport() {
                         />
 
                         <button
-                            onClick={handleSubmit}
+                            onClick={handleSignup}
                             className="bg-teal-400 px-6 py-3 rounded"
                         >
                             Create Account

@@ -11,18 +11,36 @@ export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const handleLogin = (e: any) => {
-        e.preventDefault();
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault(); // MUST
 
-        if (!email || !password) {
-            alert("Email and password required");
-            return;
+        console.log("LOGIN CLICKED", email, password);
+
+        const res = await fetch(
+            "http://localhost/ndis-backend/index.php?route=login",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email,
+                    password,
+                }),
+            }
+        );
+
+        const data = await res.json();
+        console.log("RESPONSE:", data);
+
+        if (data.success) {
+            alert("Login successful");
+            localStorage.setItem("email", email);
+            router.push("/dashboard");
+        } else {
+            alert(data.error);
         }
-
-        localStorage.setItem("isLoggedIn", "true");
-        router.push("/dashboard");
     };
-
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
 
@@ -53,10 +71,7 @@ export default function LoginPage() {
 
             {/* Login Card */}
             <div className="flex justify-center">
-                <form
-                    onSubmit={handleLogin}
-                    className="bg-white p-8 rounded-lg shadow-md w-[420px]"
-                >
+                <form onSubmit={handleLogin} className="bg-white p-8 rounded-lg shadow-md w-[420px]">
 
                     <h2 className="text-xl font-semibold text-center mb-6">
                         Login
@@ -80,17 +95,15 @@ export default function LoginPage() {
 
                     <button
                         type="submit"
-                        className="w-full bg-teal-200 text-gray-900 p-3 rounded"
+                        className="w-full bg-teal-300 p-3 rounded"
                     >
                         Login
                     </button>
-
-
                     <p className="text-center mt-4">
-                        Don't have an account?{" "}
-                        <Link href="/signup" className="text-purple-600 underline">
+                        Don’t have an account?{" "}
+                        <a href="/signup" className="text-purple-600 underline">
                             Sign up here
-                        </Link>
+                        </a>
                     </p>
 
                 </form>

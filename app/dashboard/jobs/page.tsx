@@ -1,205 +1,242 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+
+type Job = {
+    id: number;
+    title: string;
+    suburb: string;
+    postcode: string;
+    service: string;
+    hours_per_week: number;
+    // optional for future
+    day?: string;
+};
 
 export default function JobsPage() {
-    const [activeDropdown, setActiveDropdown] = useState("");
+    const router = useRouter();
+    const searchParams = useSearchParams();
 
-    const toggleDropdown = (name: string) => {
-        setActiveDropdown(activeDropdown === name ? "" : name);
+    const [jobs, setJobs] = useState<Job[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState("");
+    const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+
+    // ✅ READ FROM URL (single source of truth)
+    const servicesParam = searchParams.get("services") || "";
+    const hoursParam = searchParams.get("hours") || "";
+    const dayParam = searchParams.get("day") || "";
+    const searchParam = searchParams.get("search") || "";
+
+    const selectedServices = servicesParam ? servicesParam.split(",") : [];
+    const selectedDays = dayParam ? dayParam.split(",") : [];
+
+    // sync input with URL
+    useEffect(() => {
+        setSearch(searchParam);
+    }, [searchParam]);
+
+    // ✅ FETCH DATA
+    useEffect(() => {
+        fetch("/api/jobs")
+            .then((res) => res.json())
+            .then((data) => {
+                if (Array.isArray(data)) {
+                    setJobs(data);
+                    if (data.length > 0) setSelectedJob(data[0]);
+                } else if (Array.isArray(data.jobs)) {
+                    setJobs(data.jobs);
+                    if (data.jobs.length > 0) setSelectedJob(data.jobs[0]);
+                } else {
+                    setJobs([]);
+                }
+            })
+            .catch((err) => console.error(err))
+            .finally(() => setLoading(false));
+    }, []);
+
+    // ✅ FILTER LOGIC (CLEAN)
+    const filteredJobs = jobs.filter((job) => {
+        // SERVICE
+        const matchService =
+            selectedServices.length === 0 ||
+            selectedServices.includes(job.service);
+
+        // SEARCH (suburb/postcode)
+        const matchSearch =
+            !searchParam ||
+            job.suburb.toLowerCase().includes(searchParam.toLowerCase()) ||
+            job.postcode.toLowerCase().includes(searchParam.toLowerCase());
+
+        // HOURS
+        let matchHours = true;
+
+        if (hoursParam === "0-10") {
+            matchHours = job.hours_per_week <= 10;
+        } else if (hoursParam === "10-20") {
+            matchHours =
+                job.hours_per_week > 10 && job.hours_per_week <= 20;
+        } else if (hoursParam === "20+") {
+            matchHours = job.hours_per_week > 20;
+        }
+
+        // DAYS (safe for now)
+        const matchDay =
+            selectedDays.length === 0 ||
+            selectedDays.includes(job.day || "");
+
+        return matchService && matchSearch && matchHours && matchDay;
+    });
+
+    // ✅ SEARCH BUTTON (updates URL)
+    const handleSearch = () => {
+        const params = new URLSearchParams(searchParams.toString());
+
+        if (search) {
+            params.set("search", search);
+        } else {
+            params.delete("search");
+        }
+
+        router.push(`/dashboard/jobs?${params.toString()}`);
+    };
+
+    // ✅ CLEAR FILTERS
+    const clearFilters = () => {
+        router.push("/dashboard/jobs");
     };
 
     return (
         <div className="p-6 space-y-6">
 
-            {/* DASHBOARD CARDS */}
-
+            {/* 🔹 STATS */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-
-                <div className="bg-white rounded-xl shadow p-6">
-                    <p className="text-gray-500">Total Jobs</p>
-                    <h2 className="text-2xl font-bold">119</h2>
+                <div className="bg-white p-6 rounded-xl shadow">
+                    <p>Total Jobs</p>
+                    <h2 className="text-2xl font-bold">{jobs.length}</h2>
                 </div>
-
-                <div className="bg-white rounded-xl shadow p-6">
-                    <p className="text-gray-500">Active Jobs</p>
-                    <h2 className="text-2xl font-bold">42</h2>
+                <div className="bg-white p-6 rounded-xl shadow">
+                    <p>Active Jobs</p>
+                    <h2 className="text-2xl font-bold">{jobs.length}</h2>
                 </div>
-
-                <div className="bg-white rounded-xl shadow p-6">
-                    <p className="text-gray-500">Applications</p>
+                <div className="bg-white p-6 rounded-xl shadow">
+                    <p>Applications</p>
                     <h2 className="text-2xl font-bold">892</h2>
                 </div>
-
-                <div className="bg-white rounded-xl shadow p-6">
-                    <p className="text-gray-500">Candidates</p>
+                <div className="bg-white p-6 rounded-xl shadow">
+                    <p>Candidates</p>
                     <h2 className="text-2xl font-bold">310</h2>
                 </div>
-
             </div>
 
+            {/* 🔹 SEARCH + FILTER BAR */}
+            <div className="bg-white p-6 rounded-xl shadow space-y-4">
+                <h3 className="font-semibold">Suburb or postcode</h3>
 
-            {/* SEARCH CARD */}
-
-            <div className="bg-white rounded-xl shadow p-6">
-
-                <h3 className="font-semibold mb-4">Suburb or postcode</h3>
-
-                <div className="flex gap-3 mb-3">
+                <div className="flex gap-3">
                     <input
-                        className="border rounded-lg p-3 flex-1"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
                         placeholder="Where would you like to work?"
+                        className="border p-2 rounded w-full"
                     />
-
-                    <button className="bg-teal-500 text-white px-6 rounded-lg">
+                    <button
+                        onClick={handleSearch}
+                        className="bg-teal-600 text-white px-4 rounded"
+                    >
                         Search
                     </button>
                 </div>
 
-                <label className="flex gap-2 mb-4">
-                    <input type="checkbox" defaultChecked />
-                    Include nearby suburbs
-                </label>
-
-
-                {/* FILTER BUTTONS */}
-
-                <div className="flex flex-wrap gap-3">
-
+                {/* FILTER BUTTONS (MABLE STYLE) */}
+                <div className="flex gap-3 flex-wrap">
                     <button
-                        onClick={() => toggleDropdown("services")}
-                        className="border px-4 py-2 rounded-lg"
+                        onClick={() => router.push("/dashboard/jobs/all-filters")}
+                        className="border px-4 py-2 rounded"
                     >
-                        Services
+                        Services ({selectedServices.length})
                     </button>
 
                     <button
-                        onClick={() => toggleDropdown("days")}
-                        className="border px-4 py-2 rounded-lg"
+                        onClick={() => router.push("/dashboard/jobs/all-filters")}
+                        className="border px-4 py-2 rounded"
                     >
-                        Days
+                        Days ({selectedDays.length})
                     </button>
 
                     <button
-                        onClick={() => toggleDropdown("hours")}
-                        className="border px-4 py-2 rounded-lg"
+                        onClick={() => router.push("/dashboard/jobs/all-filters")}
+                        className="border px-4 py-2 rounded"
                     >
-                        Hours per week
+                        Hours ({hoursParam ? 1 : 0})
                     </button>
 
-
-                    {/* THIS IS THE IMPORTANT FIX */}
-
-                    <Link href="/dashboard/jobs/all-filters">
-                        <button className="border px-4 py-2 rounded-lg">
-                            All filters
-                        </button>
-                    </Link>
-
+                    <button
+                        onClick={clearFilters}
+                        className="text-red-500"
+                    >
+                        Clear all filters
+                    </button>
                 </div>
-
             </div>
 
+            {/* 🔹 MAIN CONTENT */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-            {/* SERVICES DROPDOWN */}
-
-            {activeDropdown === "services" && (
-                <div className="bg-white rounded-xl shadow p-6 grid md:grid-cols-2 gap-3">
-
-                    {[
-                        "Companionship and social support",
-                        "Transportation",
-                        "Light housework",
-                        "Personal admin and home maintenance",
-                        "Manual transfer and mobility",
-                        "Assistance with eating",
-                        "Nursing services",
-                        "Occupational therapy",
-                        "Speech pathology",
-                        "Community participation",
-                        "Meal delivery and shopping",
-                        "Light gardening",
-                        "Showering and dressing",
-                        "Assistance with medication",
-                    ].map((service) => (
-                        <label key={service} className="flex gap-2">
-                            <input type="checkbox" />
-                            {service}
-                        </label>
-                    ))}
-
+                {/* LEFT: JOB LIST */}
+                <div className="space-y-4">
+                    {loading ? (
+                        <p>Loading...</p>
+                    ) : filteredJobs.length > 0 ? (
+                        filteredJobs.map((job) => (
+                            <div
+                                key={job.id}
+                                onClick={() => setSelectedJob(job)}
+                                className={`bg-white p-6 rounded-xl shadow border cursor-pointer ${selectedJob?.id === job.id
+                                        ? "border-orange-400 bg-orange-50"
+                                        : ""
+                                    }`}
+                            >
+                                <h3 className="font-semibold text-lg">{job.title}</h3>
+                                <p className="text-gray-600">
+                                    {job.suburb} {job.postcode}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                    {job.hours_per_week} hours/week
+                                </p>
+                                <p className="text-sm text-gray-400">
+                                    Service: {job.service}
+                                </p>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-gray-500">No jobs found</p>
+                    )}
                 </div>
-            )}
 
-
-            {/* DAYS DROPDOWN */}
-
-            {activeDropdown === "days" && (
-                <div className="bg-white rounded-xl shadow p-6 grid grid-cols-2 md:grid-cols-4 gap-3">
-
-                    {[
-                        "Monday",
-                        "Tuesday",
-                        "Wednesday",
-                        "Thursday",
-                        "Friday",
-                        "Saturday",
-                        "Sunday",
-                    ].map((day) => (
-                        <label key={day} className="flex gap-2">
-                            <input type="checkbox" />
-                            {day}
-                        </label>
-                    ))}
-
+                {/* RIGHT: JOB DETAILS */}
+                <div className="bg-white p-6 rounded-xl shadow">
+                    {selectedJob ? (
+                        <>
+                            <h2 className="text-xl font-bold mb-2">
+                                {selectedJob.title}
+                            </h2>
+                            <p className="text-gray-600 mb-2">
+                                {selectedJob.suburb} {selectedJob.postcode}
+                            </p>
+                            <p className="mb-2">
+                                {selectedJob.hours_per_week} hours/week
+                            </p>
+                            <p className="mb-2">
+                                Service: {selectedJob.service}
+                            </p>
+                        </>
+                    ) : (
+                        <p>Select a job to view details</p>
+                    )}
                 </div>
-            )}
-
-
-            {/* HOURS DROPDOWN */}
-
-            {activeDropdown === "hours" && (
-                <div className="bg-white rounded-xl shadow p-6 space-y-3">
-
-                    {[
-                        "Less than 5 hours",
-                        "5 to 10 hours",
-                        "10 to 20 hours",
-                        "More than 20 hours",
-                    ].map((h) => (
-                        <label key={h} className="flex gap-2">
-                            <input type="radio" name="hours" />
-                            {h}
-                        </label>
-                    ))}
-
-                </div>
-            )}
-
-
-            {/* JOB CARD */}
-
-            <div className="bg-white rounded-xl shadow p-6 border">
-
-                <h3 className="font-semibold mb-2">
-                    Friendly and patient support worker needed
-                </h3>
-
-                <p className="text-gray-600">
-                    Weekly • 20 hours • 4 sessions
-                </p>
-
-                <p className="text-gray-500">
-                    Putney NSW 2112 • ~29 min drive
-                </p>
-
-                <p className="text-gray-400 text-sm">
-                    Posted 3 days ago • 10+ applications
-                </p>
-
             </div>
-
         </div>
     );
 }

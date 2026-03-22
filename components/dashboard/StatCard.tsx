@@ -1,3 +1,4 @@
+"use client";
 import Card from "../ui/Card"
 
 type StatCardProps = {

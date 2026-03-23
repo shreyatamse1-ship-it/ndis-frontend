@@ -35,7 +35,7 @@ export default function LoginPage() {
 
         if (data.success) {
             alert("Login successful");
-            localStorage.setItem("email", email);
+            localStorage.setItem("user", JSON.stringify(data.user));
             router.push("/dashboard");
         } else {
             alert(data.error);

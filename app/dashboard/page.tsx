@@ -13,12 +13,14 @@ export default function DashboardPage() {
     const [name, setName] = useState("");
 
     useEffect(() => {
-        const storedName = localStorage.getItem("userName");
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
         const status = localStorage.getItem("profileComplete");
 
-        if (storedName) {
-            setName(storedName);
-        }
+        setName(
+            user.name ||
+            `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+            "User"
+        );
 
         if (status !== "true") {
             router.push("/dashboard/setup-account");

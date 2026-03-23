@@ -45,9 +45,19 @@ export default function ProvideSupport() {
                 }
             );
 
-            const data = await res.json();
+            const text = await res.text();
+            console.log("RAW RESPONSE:", text);
+
+            const data = text ? JSON.parse(text) : {};
 
             if (data.success) {
+                localStorage.setItem(
+                    "user",
+                    JSON.stringify({
+                        id: data.user_id,
+                        name: data.name,
+                    })
+                );
                 alert("Account created successfully 🚀");
                 router.push("/dashboard");
             } else {

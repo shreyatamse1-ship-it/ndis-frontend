@@ -1,13 +1,42 @@
+"use client";
+import { useEffect, useState } from "react";
 import StatCard from "../components/dashboard/StatCard";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
 
+
 export default function DashboardPage() {
+    const [dashboard, setDashboard] = useState<any>(null);
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    useEffect(() => {
+        if (!user.id) return;
+
+        fetch("http://localhost/ndis-backend/index.php?route=dashboard_data", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                user_id: user.id,
+            }),
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    setDashboard(data);
+                } else {
+                    console.error(data.message);
+                }
+            })
+            .catch(err => console.error(err));
+    }, []);
     return (
         <div className="p-6 space-y-6">
 
             {/* Dashboard Title */}
-            <h1 className="text-2xl font-semibold">Dashboard</h1>
+            <h1 className="text-2xl font-semibold">
+                Welcome, {dashboard?.name || "User"}
+            </h1>
 
             {/* Stats Section */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -70,37 +99,31 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Job Card */}
-                <div className="border rounded-lg p-6 flex flex-col md:flex-row justify-between gap-4">
+                {dashboard?.jobs?.map((job: any) => (
+                    <div key={job.id} className="border rounded-lg p-6 flex justify-between">
 
-                    <div className="space-y-2">
-                        <h3 className="font-medium text-lg">
-                            Friendly and patient support worker needed
-                        </h3>
+                        <div>
+                            <h3 className="font-medium text-lg">{job.title}</h3>
 
-                        <p className="text-sm text-gray-500">
-                            Weekly • 20 hours • 4 sessions
-                        </p>
+                            <p className="text-sm text-gray-500">
+                                {job.suburb}, {job.state} {job.postcode}
+                            </p>
 
-                        <p className="text-sm text-gray-500">
-                            Putney NSW 2112 • ~29 min drive
-                        </p>
+                            <p className="text-sm text-gray-500">
+                                {job.hours} hrs/week • ${job.pay_rate}/hr • {job.job_type}
+                            </p>
+                        </div>
 
-                        <p className="text-sm text-gray-400">
-                            Posted 3 days ago • 10+ applications
-                        </p>
+                        <div className="text-sm text-green-600 font-medium">
+                            {job.status}
+                        </div>
+
                     </div>
-
-                    <div className="text-sm text-gray-600 space-y-1">
-                        <p className="font-medium">Currently available:</p>
-                        <p>Mon: 6-9am</p>
-                        <p>Wed: 6-9am</p>
-                        <p>Thu: 6-9am</p>
-                    </div>
-
-                </div>
-
+                ))}
             </div>
 
         </div>
+
+
     );
 }

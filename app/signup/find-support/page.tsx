@@ -43,9 +43,13 @@ export default function FindSupport() {
 
             const data = await res.json();
 
+            console.log("RESPONSE:", data);
+
             if (data.success) {
                 alert("Signup successful");
-                localStorage.setItem("email", formData.email);
+                localStorage.setItem("user", JSON.stringify({
+                    id: data.user_id
+                }));
                 router.push("/dashboard");
             } else {
                 alert(data.error || "Something went wrong");

@@ -9,12 +9,14 @@ type Job = {
     suburb: string;
     postcode: string;
     service: string;
-    hours_per_week: number;
-    // optional for future
+    hours_range: number;
     day?: string;
+    description?: string;
 };
 
 export default function JobsPage() {
+
+
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -22,221 +24,326 @@ export default function JobsPage() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+    const [openDropdown, setOpenDropdown] = useState<null | "services" | "days" | "hours">(null);
 
-    // ✅ READ FROM URL (single source of truth)
-    const servicesParam = searchParams.get("services") || "";
-    const hoursParam = searchParams.get("hours") || "";
-    const dayParam = searchParams.get("day") || "";
-    const searchParam = searchParams.get("search") || "";
+    const [selectedService, setSelectedService] = useState<string[]>([]);
+    const [selectedDays, setSelectedDays] = useState<string[]>([]);
+    const [selectedHours, setSelectedHours] = useState("");
 
-    const selectedServices = servicesParam ? servicesParam.split(",") : [];
-    const selectedDays = dayParam ? dayParam.split(",") : [];
+    const [authorized, setAuthorized] = useState(false);
 
-    // sync input with URL
     useEffect(() => {
-        setSearch(searchParam);
-    }, [searchParam]);
+        const role = localStorage.getItem("role");
 
-    // ✅ FETCH DATA
-    useEffect(() => {
-        fetch("/api/jobs")
-            .then((res) => res.json())
-            .then((data) => {
-                if (Array.isArray(data)) {
-                    setJobs(data);
-                    if (data.length > 0) setSelectedJob(data[0]);
-                } else if (Array.isArray(data.jobs)) {
-                    setJobs(data.jobs);
-                    if (data.jobs.length > 0) setSelectedJob(data.jobs[0]);
-                } else {
-                    setJobs([]);
-                }
-            })
-            .catch((err) => console.error(err))
-            .finally(() => setLoading(false));
+        if (role === "support_worker") {
+            setAuthorized(true);
+        } else {
+            router.push("/login");
+        }
     }, []);
 
-    // ✅ FILTER LOGIC (CLEAN)
-    const filteredJobs = jobs.filter((job) => {
-        // SERVICE
-        const matchService =
-            selectedServices.length === 0 ||
-            selectedServices.includes(job.service);
 
-        // SEARCH (suburb/postcode)
-        const matchSearch =
-            !searchParam ||
-            job.suburb.toLowerCase().includes(searchParam.toLowerCase()) ||
-            job.postcode.toLowerCase().includes(searchParam.toLowerCase());
 
-        // HOURS
-        let matchHours = true;
+    useEffect(() => {
+        const searchParam = searchParams.get("search") || "";
+        const servicesParam = searchParams.get("services") || "";
+        const hoursParam = searchParams.get("hours") || "";
+        const dayParam = searchParams.get("day") || "";
 
-        if (hoursParam === "0-10") {
-            matchHours = job.hours_per_week <= 10;
-        } else if (hoursParam === "10-20") {
-            matchHours =
-                job.hours_per_week > 10 && job.hours_per_week <= 20;
-        } else if (hoursParam === "20+") {
-            matchHours = job.hours_per_week > 20;
+        setSearch(searchParam);
+        setSelectedService(
+            servicesParam ? servicesParam.split(",") : []
+        );
+        setSelectedHours(hoursParam);
+        setSelectedDays(
+            dayParam ? dayParam.split(",") : []
+        );
+
+        handleSearch(searchParam, servicesParam, hoursParam, dayParam);
+
+    }, [searchParams]);
+
+
+
+    // SEARCH BUTTON
+    const handleSearch = async (
+        searchValue = search,
+        servicesValue = selectedService.join(","),
+        hoursValue = selectedHours,
+        dayValue = selectedDays.join(",")
+    ) => {
+        setLoading(true);
+
+        try {
+            const query = new URLSearchParams({
+                search: searchValue || "",
+                services: servicesValue || "",
+                hours: hoursValue || "",
+                day: dayValue || "", // ✅ IMPORTANT
+            });
+
+            console.log("FINAL QUERY:", query.toString());
+
+            const res = await fetch(
+                `http://localhost/ndis-backend/controllers/jobs.php?${query}`
+            );
+
+            const data = await res.json();
+
+            if (Array.isArray(data)) {
+                setJobs(data);
+                setSelectedJob(data.length > 0 ? data[0] : null);
+            } else {
+                setJobs([]);
+                setSelectedJob(null);
+            }
+
+        } catch (err) {
+            console.error("FETCH ERROR:", err);
+            setJobs([]);
+            setSelectedJob(null);
+        } finally {
+            setLoading(false);
         }
-
-        // DAYS (safe for now)
-        const matchDay =
-            selectedDays.length === 0 ||
-            selectedDays.includes(job.day || "");
-
-        return matchService && matchSearch && matchHours && matchDay;
-    });
-
-    // ✅ SEARCH BUTTON (updates URL)
-    const handleSearch = () => {
-        const params = new URLSearchParams(searchParams.toString());
-
-        if (search) {
-            params.set("search", search);
-        } else {
-            params.delete("search");
-        }
-
-        router.push(`/dashboard/jobs?${params.toString()}`);
     };
 
-    // ✅ CLEAR FILTERS
-    const clearFilters = () => {
-        router.push("/dashboard/jobs");
-    };
 
     return (
         <div className="p-6 space-y-6">
 
-            {/* 🔹 STATS */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow">
-                    <p>Total Jobs</p>
-                    <h2 className="text-2xl font-bold">{jobs.length}</h2>
-                </div>
-                <div className="bg-white p-6 rounded-xl shadow">
-                    <p>Active Jobs</p>
-                    <h2 className="text-2xl font-bold">{jobs.length}</h2>
-                </div>
-                <div className="bg-white p-6 rounded-xl shadow">
-                    <p>Applications</p>
-                    <h2 className="text-2xl font-bold">892</h2>
-                </div>
-                <div className="bg-white p-6 rounded-xl shadow">
-                    <p>Candidates</p>
-                    <h2 className="text-2xl font-bold">310</h2>
-                </div>
-            </div>
-
-            {/* 🔹 SEARCH + FILTER BAR */}
+            {/* FILTER BAR */}
             <div className="bg-white p-6 rounded-xl shadow space-y-4">
-                <h3 className="font-semibold">Suburb or postcode</h3>
+
+                <p className="text-sm font-medium">Suburb or postcode</p>
 
                 <div className="flex gap-3">
                     <input
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Where would you like to work?"
-                        className="border p-2 rounded w-full"
+                        className="border p-3 w-full rounded-lg"
                     />
+
                     <button
-                        onClick={handleSearch}
-                        className="bg-teal-600 text-white px-4 rounded"
+                        onClick={() =>
+                            handleSearch(
+                                search,
+                                selectedService.join(","),
+                                selectedHours,
+                                selectedDays.join(",")
+                            )
+                        }
+                        className="bg-teal-600 text-white px-6 rounded-lg"
                     >
                         Search
                     </button>
                 </div>
 
-                {/* FILTER BUTTONS (MABLE STYLE) */}
+                <label className="flex items-center gap-2 text-sm">
+                    <input type="checkbox" defaultChecked />
+                    Include nearby suburbs
+                </label>
+
+                {/* FILTER BUTTONS */}
                 <div className="flex gap-3 flex-wrap">
+
                     <button
-                        onClick={() => router.push("/dashboard/jobs/all-filters")}
-                        className="border px-4 py-2 rounded"
+                        onClick={() => setOpenDropdown(openDropdown === "services" ? null : "services")}
+                        className="border px-4 py-2 rounded-lg"
                     >
-                        Services ({selectedServices.length})
+                        service({selectedService.length})
                     </button>
 
                     <button
-                        onClick={() => router.push("/dashboard/jobs/all-filters")}
-                        className="border px-4 py-2 rounded"
+                        onClick={() => setOpenDropdown(openDropdown === "days" ? null : "days")}
+                        className="border px-4 py-2 rounded-lg"
                     >
                         Days ({selectedDays.length})
                     </button>
 
                     <button
-                        onClick={() => router.push("/dashboard/jobs/all-filters")}
-                        className="border px-4 py-2 rounded"
+                        onClick={() => setOpenDropdown(openDropdown === "hours" ? null : "hours")}
+                        className="border px-4 py-2 rounded-lg"
                     >
-                        Hours ({hoursParam ? 1 : 0})
+                        Hours ({selectedHours ? 1 : 0})
                     </button>
 
                     <button
-                        onClick={clearFilters}
-                        className="text-red-500"
+                        onClick={() => router.push("/dashboard/jobs/all-filters")}
+                        className="border px-4 py-2 rounded-lg"
                     >
-                        Clear all filters
+                        All filters
                     </button>
+
                 </div>
             </div>
+            {openDropdown === "services" && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-            {/* 🔹 MAIN CONTENT */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {[
+                        "Companionship and social support",
+                        "Transportation",
+                        "Light housework",
+                        "Personal admin and home maintenance",
+                        "Manual transfer and mobility",
+                        "Assistance with eating",
+                        "Nursingservice",
+                        "Occupational therapy",
+                        "Speech pathology",
+                        "Community participation, sports and activities",
+                        "Meal delivery, preparation and shopping",
+                        "Light gardening",
+                        "Showering, toileting and dressing",
+                        "Assistance with medication",
+                        "Light massage and exercise assistance",
+                        "Psychology",
+                        "Physiotherapy"
+                    ].map((service) => (
+                        <label key={service} className="flex gap-2">
+                            <input
+                                type="checkbox"
+                                checked={selectedService.includes(service)}
+                                onChange={() => {
+                                    const updated = selectedService.includes(service)
+                                        ? selectedService.filter((s) => s !== service)
+                                        : [...selectedService, service];
 
-                {/* LEFT: JOB LIST */}
-                <div className="space-y-4">
-                    {loading ? (
-                        <p>Loading...</p>
-                    ) : filteredJobs.length > 0 ? (
-                        filteredJobs.map((job) => (
-                            <div
-                                key={job.id}
-                                onClick={() => setSelectedJob(job)}
-                                className={`bg-white p-6 rounded-xl shadow border cursor-pointer ${selectedJob?.id === job.id
-                                        ? "border-orange-400 bg-orange-50"
-                                        : ""
-                                    }`}
-                            >
-                                <h3 className="font-semibold text-lg">{job.title}</h3>
-                                <p className="text-gray-600">
-                                    {job.suburb} {job.postcode}
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                    {job.hours_per_week} hours/week
-                                </p>
-                                <p className="text-sm text-gray-400">
-                                    Service: {job.service}
-                                </p>
-                            </div>
-                        ))
-                    ) : (
-                        <p className="text-gray-500">No jobs found</p>
-                    )}
+                                    setSelectedService(updated);
+
+                                }}
+                            />
+                            {service}
+                        </label>
+                    ))}
+
+                    <div className="mt-4 flex justify-end">
+                        <button
+                            className="bg-teal-200 text-gray-900 px-4 py-2 rounded-lg"
+                            onClick={() => {
+                                setOpenDropdown(null);
+                                handleSearch();
+                            }}
+                        >
+                            Apply
+                        </button>
+                    </div>
+
+                </div>
+            )}
+            {openDropdown === "days" && (
+                <div className="bg-white p-4 rounded-xl shadow mt-4">
+
+                    {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map((day) => (
+                        <label key={day} className="block">
+                            <input
+                                type="checkbox"
+                                checked={selectedDays.includes(day)}
+                                onChange={() => {
+                                    const updated = selectedDays.includes(day)
+                                        ? selectedDays.filter((d) => d !== day)
+                                        : [...selectedDays, day];
+                                    setSelectedDays(updated);
+                                }}
+                            />
+                            {day}
+                        </label>
+                    ))}
+
+                    <div className="mt-4 flex justify-end">
+                        <button
+                            className="bg-teal-200 text-gray-900 px-4 py-2 rounded-lg"
+                            onClick={() => {
+                                setOpenDropdown(null);
+                                handleSearch();
+                            }}
+                        >
+                            Apply
+                        </button>
+                    </div>
+
+                </div>
+            )}
+
+            {openDropdown === "hours" && (
+                <div className="bg-white p-4 rounded-xl shadow mt-4">
+
+                    {["0-10", "10-20", "20+"].map((h) => (
+                        <label key={h} className="block">
+                            <input
+                                type="radio"
+                                name="hours"
+                                checked={selectedHours === h}
+                                onChange={() => {
+                                    setSelectedHours(h);
+                                }}
+                            />
+                            {h}
+                        </label>
+                    ))}
+
+                    {/* ✅ APPLY BUTTON OUTSIDE MAP */}
+                    <div className="mt-4 flex justify-end">
+                        <button
+                            className="bg-teal-200 text-gray-900 px-4 py-2 rounded-lg"
+                            onClick={() => {
+                                setOpenDropdown(null);
+                                handleSearch();
+                            }}
+                        >
+                            Apply
+                        </button>
+                    </div>
+
+                </div>
+            )}
+
+            {/* JOB LIST */}
+            <div className="flex flex-col gap-4">
+
+                <div>
+
+
+                    {
+                        loading ? (
+                            <p> Loading...</p>
+                        ) : jobs.length === 0 ? (
+                            <p>No jobs found</p>
+                        ) : (
+                            jobs.map((job) => (
+                                <div
+
+                                    key={job.id}
+                                    onClick={() => router.push(`/dashboard/jobs/${job.id}`)}
+                                    className="p-4 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-teal-300"
+                                >
+                                    <h3 className="font-semibold">{job.title}</h3>
+                                    <p>{job.suburb} {job.postcode}</p>
+                                    <p>{job.hours_range} hrs/week</p>
+                                    <p>{job.service || "Service not specified"}</p>
+                                    <p className="text-sm text-gray-500 line-clamp-2">
+                                        {job.description}
+                                    </p>
+                                </div>
+                            ))
+                        )}
                 </div>
 
-                {/* RIGHT: JOB DETAILS */}
-                <div className="bg-white p-6 rounded-xl shadow">
+                {/* DETAILS */}
+                <div className="border p-4 rounded">
                     {selectedJob ? (
                         <>
-                            <h2 className="text-xl font-bold mb-2">
-                                {selectedJob.title}
-                            </h2>
-                            <p className="text-gray-600 mb-2">
-                                {selectedJob.suburb} {selectedJob.postcode}
-                            </p>
-                            <p className="mb-2">
-                                {selectedJob.hours_per_week} hours/week
-                            </p>
-                            <p className="mb-2">
-                                Service: {selectedJob.service}
-                            </p>
+                            <h2 className="font-bold">{selectedJob.title}</h2>
+                            <p>{selectedJob.suburb}</p>
+                            <p>{selectedJob.hours_range} hrs/week</p>
+                            <p>{selectedJob.service || "Service not specified"}</p>
+                            <p>{selectedJob.service}</p>
                         </>
                     ) : (
-                        <p>Select a job to view details</p>
+                        <p>Select a job</p>
                     )}
                 </div>
+
             </div>
-        </div>
+        </div >
     );
 }

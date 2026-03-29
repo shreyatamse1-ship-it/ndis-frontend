@@ -13,7 +13,8 @@ export default function ProvideSupport() {
         lastName: "",
         mobile: "",
         email: "",
-        password: ""
+        password: "",
+        location: ""
     })
 
     const handleChange = (e) => {
@@ -28,22 +29,23 @@ export default function ProvideSupport() {
     }
     const handleSubmit = async () => {
         try {
-            const res = await fetch(
-                "http://localhost/ndis-backend/index.php?route=provider_signup",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        first_name: formData.firstName,
-                        last_name: formData.lastName,
-                        email: formData.email,
-                        password: formData.password,
-                        phone: formData.mobile,
-                    }),
-                }
-            );
+            const res = await fetch
+                ("http://localhost/ndis-backend/index.php?route=provider_signup",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            first_name: formData.firstName,
+                            last_name: formData.lastName,
+                            email: formData.email,
+                            password: formData.password,
+                            phone: formData.mobile,
+                            role: "support_worker"
+                        }),
+                    }
+                );
 
             const text = await res.text();
             console.log("RAW RESPONSE:", text);

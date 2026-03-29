@@ -30,15 +30,29 @@ export default function LoginPage() {
             }
         );
 
-        const data = await res.json();
+
+
+        const text = await res.text();
+        console.log("RAW RESPONSE:", text);
+
+        const data = text ? JSON.parse(text) : {};
         console.log("RESPONSE:", data);
 
-        if (data.success) {
-            alert("Login successful");
-            localStorage.setItem("user", JSON.stringify(data.user));
-            router.push("/dashboard");
+        if (!data.success) {
+            alert(data.message);
+            return;
+        }
+
+
+        const user = data.user;
+
+        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("role", data.role); // ✅ IMPORTANT
+
+        if (data.role === "support_worker") {
+            router.push("/dashboard/jobs");
         } else {
-            alert(data.error);
+            router.push("/dashboard/participant");
         }
     };
     return (

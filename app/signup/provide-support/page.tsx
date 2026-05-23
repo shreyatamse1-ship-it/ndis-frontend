@@ -17,7 +17,7 @@ export default function ProvideSupport() {
         location: ""
     })
 
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
         const { name, value } = e.target
 

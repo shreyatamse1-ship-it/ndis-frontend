@@ -53,6 +53,12 @@ export default function PostJobPage() {
         }
 
         setLoading(true);
+        const user = JSON.parse(localStorage.getItem("user") || "null");
+
+        if (!user || !user.id) {
+            alert("User not logged in");
+            return;
+        }
 
         try {
             const res = await fetch(
@@ -64,7 +70,7 @@ export default function PostJobPage() {
                     },
                     body: JSON.stringify({
                         ...form,
-                        participant_id: 1, // 🔥 TEMP (replace with logged-in user later)
+                        user_id: user.id,
                     }),
                 }
             );
@@ -95,79 +101,122 @@ export default function PostJobPage() {
     };
 
     return (
-        <div className="p-6 max-w-2xl space-y-5">
-            <h2 className="text-2xl font-bold">Post a Job</h2>
+        <div className="min-h-screen bg-gray-50">
+            <div className="px-8 py-6 space-y-8">
+                {/* HEADER */}
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                        Post a Job
+                    </h1>
+                    <p className="text-gray-600">
+                        Create a new job posting to find support workers
+                    </p>
+                </div>
 
-            {/* Title */}
-            <input
-                name="title"
-                placeholder="Job Title (e.g. Support Worker Needed)"
-                value={form.title}
-                onChange={handleChange}
-                className="w-full border p-2 rounded"
-            />
+                {/* FORM CARD */}
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-5">
+                    {/* Title */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Job Title <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            name="title"
+                            placeholder="e.g. Support Worker Needed"
+                            value={form.title}
+                            onChange={handleChange}
+                            className="w-full border border-gray-300 px-4 py-2.5 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                        />
+                    </div>
 
-            {/* Suburb */}
-            <input
-                name="suburb"
-                placeholder="Suburb (e.g. Sydney)"
-                value={form.suburb}
-                onChange={handleChange}
-                className="w-full border p-2 rounded"
-            />
+                    {/* Suburb */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Suburb <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            name="suburb"
+                            placeholder="e.g. Sydney"
+                            value={form.suburb}
+                            onChange={handleChange}
+                            className="w-full border border-gray-300 px-4 py-2.5 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                        />
+                    </div>
 
-            {/* Postcode */}
-            <input
-                name="postcode"
-                placeholder="Postcode (e.g. 2000)"
-                value={form.postcode}
-                onChange={handleChange}
-                className="w-full border p-2 rounded"
-            />
+                    {/* Postcode */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Postcode <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            name="postcode"
+                            placeholder="e.g. 2000"
+                            value={form.postcode}
+                            onChange={handleChange}
+                            className="w-full border border-gray-300 px-4 py-2.5 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                        />
+                    </div>
 
-            {/* Hours */}
-            <input
-                name="hours_range"
-                placeholder="Hours (e.g. 10-20 hrs/week)"
-                value={form.hours_range}
-                onChange={handleChange}
-                className="w-full border p-2 rounded"
-            />
+                    {/* Hours */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Hours Range <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            name="hours_range"
+                            placeholder="e.g. 10-20 hrs/week"
+                            value={form.hours_range}
+                            onChange={handleChange}
+                            className="w-full border border-gray-300 px-4 py-2.5 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                        />
+                    </div>
 
-            {/* Service ID */}
-            <select
-                name="service_id"
-                value={form.service_id}
-                onChange={handleChange}
-                className="w-full border p-2 rounded"
-            >
-                <option value="">Select Service</option>
+                    {/* Service ID */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Service <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                            name="service_id"
+                            value={form.service_id}
+                            onChange={handleChange}
+                            className="w-full border border-gray-300 px-4 py-2.5 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition bg-white"
+                        >
+                            <option value="">Select a Service</option>
 
-                {services.map((service) => (
-                    <option key={service.id} value={service.id}>
-                        {service.name}
-                    </option>
-                ))}
-            </select>
+                            {services.map((service) => (
+                                <option key={service.id} value={service.id}>
+                                    {service.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-            {/* Description */}
-            <textarea
-                name="description"
-                placeholder="Describe the job..."
-                value={form.description}
-                onChange={handleChange}
-                className="w-full border p-2 rounded"
-                rows={4}
-            />
+                    {/* Description */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Description <span className="text-red-500">*</span>
+                        </label>
+                        <textarea
+                            name="description"
+                            placeholder="Describe the job details, responsibilities, and requirements..."
+                            value={form.description}
+                            onChange={handleChange}
+                            className="w-full border border-gray-300 px-4 py-2.5 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition resize-none"
+                            rows={5}
+                        />
+                    </div>
 
-            {/* Submit Button */}
-            <button
-                onClick={handleSubmit}
-                disabled={loading}
-                className="bg-green-600 text-white px-4 py-2 rounded w-full"
-            >
-                {loading ? "Posting..." : "Post Job"}
-            </button>
+                    {/* Submit Button */}
+                    <button
+                        onClick={handleSubmit}
+                        disabled={loading}
+                        className="w-full bg-teal-600 hover:bg-teal-700 text-white px-6 py-2.5 rounded-lg font-medium text-sm transition disabled:bg-gray-400 disabled:cursor-not-allowed mt-6"
+                    >
+                        {loading ? "Posting..." : "Post Job"}
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }

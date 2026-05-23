@@ -1,5 +1,5 @@
 "use client"
-
+import { useEffect, useState } from "react";
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -21,26 +21,56 @@ type SidebarProps = {
 }
 
 export default function Sidebar({ open, setOpen }: SidebarProps) {
+    const [role, setRole] = useState("");
+
+    useEffect(() => {
+        const storedRole = localStorage.getItem("role");
+        setRole(storedRole || "");
+    }, []);
 
     const pathname = usePathname()
 
-    const menu = [
+    // ✅ COMMON MENU (NO MESSAGES HERE)
+    const commonMenu = [
         { name: "Edit profile", href: "/dashboard/edit-profile", icon: Pencil },
-        { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-        { name: "Manage sessions", href: "/dashboard/sessions", icon: Calendar },
+        {
+            name: "Dashboard",
+            href: role === "participant" ? "/dashboard/participant" : "/dashboard/jobs",
+            icon: LayoutDashboard
+        },
+        { name: "Billing", href: "/dashboard/billing", icon: CreditCard },
+        { name: "Account", href: "/dashboard/account", icon: Settings },
+    ];
+
+    // ✅ ROLE-BASED MESSAGES
+    const messageMenu =
+        role === "support_worker"
+            ? [{ name: "Messages", href: "/dashboard/messages", icon: Inbox }]
+            : [];
+
+    const workerMenu = [
+        { name: "Bookings", href: "/dashboard/bookings", icon: Calendar },
         { name: "Jobs", href: "/dashboard/jobs", icon: Briefcase },
         { name: "Manage clients", href: "/dashboard/clients", icon: Users },
         { name: "Support hours", href: "/dashboard/support", icon: Clock },
-        { name: "Inbox", href: "/dashboard/inbox", icon: Inbox },
-        { name: "Billing", href: "/dashboard/billing", icon: CreditCard },
         { name: "My clients", href: "/dashboard/myclients", icon: User },
-        { name: "Account", href: "/dashboard/account", icon: Settings },
-    ]
+    ];
 
+    const participantMenu = [
+        { name: "Post Job", href: "/dashboard/participant/post-job", icon: Briefcase },
+        { name: "Applications", href: "/dashboard/participant/applications", icon: Users },
+    ];
+
+    // ✅ FINAL MENU
+    const menu = [
+        ...commonMenu,
+        ...messageMenu,
+        ...(role === "support_worker" ? workerMenu : []),
+        ...(role === "participant" ? participantMenu : []),
+    ];
 
     return (
         <>
-            {/* Mobile overlay */}
             {open && (
                 <div
                     className="fixed inset-0 bg-black/40 z-30 lg:hidden"
@@ -58,12 +88,10 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
       `}
             >
 
-                {/* Header */}
                 <div className="p-6 font-semibold text-lg border-b border-white/20">
                     Edit profile
                 </div>
 
-                {/* Menu */}
                 <nav className="flex flex-col gap-2 p-4">
 
                     {menu.map((item) => {
@@ -81,38 +109,24 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                                         : "hover:bg-white/10"}
                 `}
                             >
-
                                 <Icon size={18} />
                                 {item.name}
-
                             </Link>
                         )
                     })}
 
                     <div className="border-t border-white/20 p-4 flex flex-col gap-3 text-sm">
 
-                        <a
-                            href="#"
-                            className="flex justify-between items-center hover:text-gray-200"
-                        >
-                            Help
-                            <span>›</span>
+                        <a href="#" className="flex justify-between items-center hover:text-gray-200">
+                            Help <span>›</span>
                         </a>
 
-                        <a
-                            href="#"
-                            className="flex justify-between items-center hover:text-gray-200"
-                        >
-                            About us
-                            <span>›</span>
+                        <a href="#" className="flex justify-between items-center hover:text-gray-200">
+                            About us <span>›</span>
                         </a>
 
-                        <a
-                            href="#"
-                            className="flex justify-between items-center hover:text-gray-200"
-                        >
-                            Search workers
-                            <span>›</span>
+                        <a href="#" className="flex justify-between items-center hover:text-gray-200">
+                            Search workers <span>›</span>
                         </a>
 
                     </div>

@@ -1,8 +1,62 @@
 "use client"
 
+import { useState } from "react"
 import ProfileSidebar from "../../ProfileSidebar"
 
 export default function BankAccountPage() {
+
+    const [accountName, setAccountName] = useState("")
+    const [bankName, setBankName] = useState("")
+    const [bsb, setBsb] = useState("")
+    const [accountNumber, setAccountNumber] = useState("")
+    const [agreed, setAgreed] = useState(false)
+
+    const handleSave = async () => {
+
+        // ✅ Basic validation
+        if (!accountName || !bankName || !bsb || !accountNumber) {
+            alert("Please fill all fields")
+            return
+        }
+
+        if (!agreed) {
+            alert("Please accept the agreement")
+            return
+        }
+
+        const payload = {
+            user_id: 1, // replace later with real login ID
+            account_name: accountName,
+            bank_name: bankName,
+            bsb: bsb,
+            account_number: accountNumber
+        }
+
+        try {
+            const res = await fetch("http://localhost/ndis-backend/controllers/save_bank.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            })
+
+            const text = await res.text()
+            console.log("RAW:", text)
+
+            const data = JSON.parse(text)
+
+            if (data.status === "success") {
+                alert("Bank details saved ✅")
+            } else {
+                alert(data.message)
+            }
+
+        } catch (err) {
+            console.error(err)
+            alert("Something went wrong")
+        }
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 p-6">
@@ -26,23 +80,16 @@ export default function BankAccountPage() {
                     </h2>
 
                     <p className="text-gray-600 mb-6">
-                        To get you paid as soon as possible, enter your bank details below so that
-                        Mable can process payments to you on behalf of your clients.
+                        Enter your bank details to receive payments.
                     </p>
 
-                    {/* Info box */}
+                    {/* Info */}
                     <div className="bg-purple-100 rounded-lg p-4 mb-6 flex items-start gap-3">
                         <span>🔒</span>
                         <p>
-                            Your bank details <strong>will not be displayed on your profile</strong>
-                            and only used to process your payments by the Mable team.
+                            Your bank details <strong>will not be displayed</strong>
                         </p>
                     </div>
-
-                    <h3 className="text-lg font-semibold mb-4">
-                        Add your bank account details
-                    </h3>
-
 
                     {/* Account Name */}
                     <div className="mb-4">
@@ -52,10 +99,11 @@ export default function BankAccountPage() {
 
                         <input
                             type="text"
+                            value={accountName}
+                            onChange={(e) => setAccountName(e.target.value)}
                             className="w-full border border-gray-200 rounded-md p-3"
                         />
                     </div>
-
 
                     {/* Bank Name */}
                     <div className="mb-4">
@@ -65,10 +113,11 @@ export default function BankAccountPage() {
 
                         <input
                             type="text"
+                            value={bankName}
+                            onChange={(e) => setBankName(e.target.value)}
                             className="w-full border border-gray-200 rounded-md p-3"
                         />
                     </div>
-
 
                     {/* BSB + Account */}
                     <div className="grid md:grid-cols-2 gap-4 mb-6">
@@ -80,6 +129,8 @@ export default function BankAccountPage() {
 
                             <input
                                 type="text"
+                                value={bsb}
+                                onChange={(e) => setBsb(e.target.value)}
                                 className="w-full border border-gray-200 rounded-md p-3"
                             />
                         </div>
@@ -91,36 +142,39 @@ export default function BankAccountPage() {
 
                             <input
                                 type="text"
+                                value={accountNumber}
+                                onChange={(e) => setAccountNumber(e.target.value)}
                                 className="w-full border border-gray-200 rounded-md p-3"
                             />
                         </div>
 
                     </div>
 
-
                     {/* Checkbox */}
                     <div className="flex items-start gap-3 mb-6">
 
-                        <input type="checkbox" />
+                        <input
+                            type="checkbox"
+                            checked={agreed}
+                            onChange={(e) => setAgreed(e.target.checked)}
+                        />
 
                         <p className="text-gray-600 text-sm">
-                            I understand that Mable is not responsible for checking the accuracy
-                            of my BSB and Account Number. Any errors in this information may
-                            result in me not being paid for services I have provided to clients.
+                            I confirm my details are correct.
                         </p>
 
                     </div>
 
-
-                    {/* Save button */}
-                    <button className="bg-teal-200 hover:bg-teal-400 text-gray-900 px-8 py-3 rounded-md">
+                    {/* Save */}
+                    <button
+                        onClick={handleSave}
+                        className="bg-teal-200 hover:bg-teal-400 text-gray-900 px-8 py-3 rounded-md"
+                    >
                         Save and continue
                     </button>
 
                 </div>
-
             </div>
-
         </div>
     )
 }

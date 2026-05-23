@@ -18,11 +18,13 @@ export default function SetupAccountPage() {
     });
     // ✅ Load user from localStorage
     useEffect(() => {
-        const storedEmail = localStorage.getItem("email");
-        if (storedEmail) {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+        if (user) {
             setFormData((prev) => ({
                 ...prev,
-                email: storedEmail,
+                email: user.email || "",
+                name: user.name || ""
             }));
         }
     }, []);
@@ -43,7 +45,9 @@ export default function SetupAccountPage() {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                email: localStorage.getItem("email"),
+                id: localStorage.getItem("user_id"),   // 🔥 THIS IS KEY
+                email: formData.email,
+                phone: formData.phone,
                 dob: formData.dob,
                 address: formData.address,
                 about: formData.about
@@ -103,7 +107,7 @@ export default function SetupAccountPage() {
                         <input
                             name="email"
                             value={formData.email}
-                            readOnly
+                            onChange={handleChange}
                             className="w-full border border-gray-200 rounded-lg px-4 py-3 bg-white
                         focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 transition"
                         />

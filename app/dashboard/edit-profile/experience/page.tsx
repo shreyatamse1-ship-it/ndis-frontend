@@ -5,22 +5,83 @@ import ProfileSidebar from "../../ProfileSidebar"
 
 export default function ExperiencePage() {
 
-    const [selectedAreas, setSelectedAreas] = useState<string[]>(["Aged care"])
-    const [experienceType, setExperienceType] = useState({
-        professional: true,
-        personal: false
-    })
+    const [selectedAreas, setSelectedAreas] = useState<string[]>([])
 
-    const [skills, setSkills] = useState<string[]>(["Dementia"])
+    const [experienceType, setExperienceType] = useState<"professional" | "personal" | "">("professional")
+
+    const [topSkills, setTopSkills] = useState<string[]>([])
+    const [otherSkills, setOtherSkills] = useState<string[]>([])
+
     const [text, setText] = useState("")
 
-    const toggleSkill = (skill: string) => {
-        if (skills.includes(skill)) {
-            setSkills(skills.filter(s => s !== skill))
+    // Toggle for top 3 skills
+    const toggleTopSkill = (skill: string) => {
+        if (topSkills.includes(skill)) {
+            setTopSkills(topSkills.filter(s => s !== skill))
         } else {
-            setSkills([...skills, skill])
+            if (topSkills.length >= 3) {
+                alert("Max 3 allowed")
+                return
+            }
+            setTopSkills([...topSkills, skill])
         }
     }
+
+    // Toggle for other areas
+    const toggleOtherSkill = (skill: string) => {
+        if (otherSkills.includes(skill)) {
+            setOtherSkills(otherSkills.filter(s => s !== skill))
+        } else {
+            setOtherSkills([...otherSkills, skill])
+        }
+    }
+    const handleSave = async () => {
+
+        const payload = {
+            user_id: 1,
+
+            experience_type: "professional",
+
+            aged_care: 1,
+            chronic_conditions: 0,
+            disability: 0,
+            mental_health: 0,
+
+            top_areas: ["Dementia"],
+            strengths: "I have over 2 years of experience working with elderly patients in dementia care, providing support and assistance.",
+            other_areas: []
+        };
+
+        try {
+            const res = await fetch("http://localhost/ndis-backend/controllers/save_experience.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const text = await res.text();
+            console.log("RAW RESPONSE:", text);
+
+            const data = JSON.parse(text);
+
+            console.log("PARSED:", data);
+
+            if (data.status === "success") {
+                alert("Saved successfully ✅");
+            } else {
+                alert(data.message);
+            }
+
+        } catch (err) {
+            console.error("ERROR:", err);
+            alert("Something broke");
+        }
+    };
+
+
+
 
     return (
 
@@ -37,8 +98,7 @@ export default function ExperiencePage() {
                     <ProfileSidebar />
                 </div>
 
-
-                {/* Right Content */}
+                {/* Main */}
                 <div className="flex-1 bg-white border border-gray-200 rounded-lg p-6">
 
                     <h2 className="text-2xl font-semibold mb-2">
@@ -46,11 +106,10 @@ export default function ExperiencePage() {
                     </h2>
 
                     <p className="text-gray-600 mb-6">
-                        Select all areas that you’ve worked or have professional or personal experience in.
+                        Select all areas you've worked in
                     </p>
 
-
-                    {/* Experience cards */}
+                    {/* AREA SELECT */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
 
                         {["Aged care", "Chronic medical conditions", "Disability", "Mental health"].map((area) => (
@@ -65,166 +124,121 @@ export default function ExperiencePage() {
                                     }
                                 }}
                                 className={`border rounded-lg p-4 text-center cursor-pointer
-                  ${selectedAreas.includes(area)
+                                ${selectedAreas.includes(area)
                                         ? "bg-gray-100 border-gray-300"
-                                        : "border-gray-200"}
-                `}
+                                        : "border-gray-200"}`}
                             >
                                 {area}
+                            </div>
+
+                        ))}
+                    </div>
+
+                    {/* EXPERIENCE TYPE */}
+                    <div className="mb-6">
+
+                        <h3 className="font-semibold mb-2">Experience Type</h3>
+
+                        <div className="flex gap-4">
+
+                            <button
+                                onClick={() => setExperienceType("professional")}
+                                className={`px-4 py-2 border rounded 
+                                ${experienceType === "professional" ? "bg-gray-200" : ""}`}
+                            >
+                                Professional
+                            </button>
+
+                            <button
+                                onClick={() => setExperienceType("personal")}
+                                className={`px-4 py-2 border rounded 
+                                ${experienceType === "personal" ? "bg-gray-200" : ""}`}
+                            >
+                                Personal
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    {/* TOP SKILLS */}
+                    <div className="mb-6">
+
+                        <h3 className="font-semibold mb-2">
+                            Top 3 Experience Areas
+                        </h3>
+
+                        {["Dementia", "Parkinson's Disease"].map(skill => (
+
+                            <div
+                                key={skill}
+                                onClick={() => toggleTopSkill(skill)}
+                                className={`border rounded-full px-4 py-2 mb-2 cursor-pointer
+                                ${topSkills.includes(skill)
+                                        ? "bg-gray-200"
+                                        : ""}`}
+                            >
+                                {skill}
                             </div>
 
                         ))}
 
                     </div>
 
-
-                    {/* Details section */}
-                    <p className="text-gray-600 mb-6">
-                        Provide more details and describe your experience and knowledge under each area.
-                    </p>
-
-
-                    {/* Aged care section */}
+                    {/* TEXT */}
                     <div className="mb-6">
 
-                        <h3 className="text-lg font-semibold mb-2">
-                            Aged care
-                        </h3>
-
-                        <p className="mb-4">
-                            What type of experience do you have with aged care?
-                        </p>
-
-
-                        <div className="flex flex-col gap-2 mb-4">
-
-                            <label className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    checked={experienceType.professional}
-                                    onChange={() =>
-                                        setExperienceType({
-                                            ...experienceType,
-                                            professional: !experienceType.professional
-                                        })
-                                    }
-                                />
-                                Professional
-                            </label>
-
-                            <label className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    checked={experienceType.personal}
-                                    onChange={() =>
-                                        setExperienceType({
-                                            ...experienceType,
-                                            personal: !experienceType.personal
-                                        })
-                                    }
-                                />
-                                Personal
-                            </label>
-
-                        </div>
-
-
-                        <p className="mb-4">
-                            Select up to three areas you have the most experience in.
-                        </p>
-
-
-                        <div className="flex flex-col gap-3 mb-6">
-
-                            {["Dementia", "Parkinson's Disease"].map(skill => (
-
-                                <div
-                                    key={skill}
-                                    onClick={() => toggleSkill(skill)}
-                                    className={`border rounded-full px-4 py-2 text-center cursor-pointer
-                    ${skills.includes(skill)
-                                            ? "bg-gray-100 border-gray-300"
-                                            : "border-gray-200"}
-                  `}
-                                >
-                                    {skill}
-                                </div>
-
-                            ))}
-
-                        </div>
-
-
                         <h4 className="font-semibold mb-2">
-                            What are your key strengths, achievements and skills in aged care?
+                            Strengths & Achievements
                         </h4>
-
-                        <p className="text-gray-500 mb-3">
-                            Don't include personal details or prohibited content as under our terms of use.
-                        </p>
-
 
                         <textarea
                             value={text}
                             onChange={(e) => setText(e.target.value)}
-                            className="w-full border border-gray-200 rounded-lg p-3 h-32"
+                            className="w-full border p-3 rounded"
                             maxLength={600}
                         />
 
-
-                        <div className="flex justify-between text-sm text-gray-500 mt-1">
-                            <span>Minimum 100 characters</span>
-                            <span>{text.length}/600</span>
+                        <div className="text-sm text-gray-500 mt-1">
+                            {text.length}/600
                         </div>
 
                     </div>
 
-
-                    {/* Other areas */}
+                    {/* OTHER AREAS */}
                     <div className="mb-6">
 
                         <h4 className="font-semibold mb-2">
-                            What other areas do you know about?
+                            Other Areas
                         </h4>
 
-                        <p className="text-gray-600 mb-4">
-                            This could be an area you've studied or have informal experience.
-                        </p>
+                        {["Dementia", "Parkinson's Disease"].map(skill => (
 
+                            <label key={skill} className="flex gap-2 mb-2">
 
-                        <div className="flex flex-col gap-3">
+                                <input
+                                    type="checkbox"
+                                    checked={otherSkills.includes(skill)}
+                                    onChange={() => toggleOtherSkill(skill)}
+                                />
 
-                            {["Dementia", "Parkinson's Disease"].map(skill => (
+                                {skill}
 
-                                <label key={skill} className="flex items-center gap-2">
+                            </label>
 
-                                    <input
-                                        type="checkbox"
-                                        checked={skills.includes(skill)}
-                                        onChange={() => toggleSkill(skill)}
-                                    />
-
-                                    {skill}
-
-                                </label>
-
-                            ))}
-
-                        </div>
+                        ))}
 
                     </div>
 
-
-                    {/* Save button */}
-                    <button className="bg-teal-200 hover:bg-teal-500 text-gray-900 px-8 py-3 rounded-md">
+                    <button
+                        onClick={handleSave}
+                        className="bg-teal-300 hover:bg-teal-500 px-6 py-3 rounded"
+                    >
                         Save and continue
                     </button>
 
                 </div>
-
             </div>
-
         </div>
-
     )
 }

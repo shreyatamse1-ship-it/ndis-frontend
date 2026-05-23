@@ -1,144 +1,185 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import ProfileSidebar from "../../ProfileSidebar"
 
-export default function EducationTrainingPage() {
+type Course = {
+    institution: string
+    course: string
+    start_month: string
+    start_year: string
+    end_month: string
+    end_year: string
+    currently_studying: boolean
+}
 
-    const [courses, setCourses] = useState([{}])
+export default function EducationPage() {
+
+    const [courses, setCourses] = useState<Course[]>([])
+
+    const user_id =
+        typeof window !== "undefined"
+            ? localStorage.getItem("user_id")
+            : null
+
+    useEffect(() => {
+        if (!user_id) return
+
+        fetch(`http://localhost/ndis-backend/controllers/get_education.php?user_id=${user_id}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success" && data.courses.length > 0) {
+                    setCourses(data.courses)
+                } else {
+                    addCourse()
+                }
+            })
+    }, [user_id])
 
     const addCourse = () => {
-        setCourses([...courses, {}])
+        setCourses([
+            ...courses,
+            {
+                institution: "",
+                course: "",
+                start_month: "",
+                start_year: "",
+                end_month: "",
+                end_year: "",
+                currently_studying: false
+            }
+        ])
     }
 
     const deleteCourse = (index: number) => {
-        const updated = courses.filter((_, i) => i !== index)
+        setCourses(courses.filter((_, i) => i !== index))
+    }
+
+    const handleChange = (index: number, field: keyof Course, value: string | boolean) => {
+        const updated = [...courses]
+        updated[index] = { ...updated[index], [field]: value }
         setCourses(updated)
+    }
+
+    const handleSave = async () => {
+
+        if (!user_id) {
+            alert("User not logged in")
+            return
+        }
+
+        const res = await fetch("http://localhost/ndis-backend/controllers/save_education.php", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                user_id: Number(user_id),
+                courses
+            })
+        })
+
+        const data = await res.json()
+
+        if (data.status === "success") {
+            alert("Saved ✅")
+        }
     }
 
     return (
         <div className="min-h-screen bg-gray-50 p-6">
 
-            <h1 className="text-2xl font-semibold mb-6">My profile</h1>
+            <div className="flex gap-6">
 
-            <div className="flex flex-col md:flex-row gap-6">
-
-                {/* Sidebar */}
-                <div className="w-full md:w-72">
+                <div className="w-72">
                     <ProfileSidebar />
                 </div>
 
-                {/* Right Content */}
-                <div className="flex-1 bg-white border border-gray-200 rounded-lg p-6">
+                <div className="flex-1 bg-white p-6">
 
-                    <h2 className="text-xl font-semibold mb-6">
+                    <h2 className="text-xl font-semibold mb-4">
                         Education & Training
                     </h2>
 
-                    {courses.map((_, index) => (
+                    {courses.map((c, i) => (
 
-                        <div key={index} className="mb-10 border-b pb-6">
+                        <div key={i} className="mb-8">
 
-                            {/* Institution */}
-                            <label className="font-medium">Institution</label>
                             <input
-                                type="text"
-                                className="w-full border border-gray-200 rounded-md p-3 mt-2 mb-5"
+                                placeholder="Institution"
+                                value={c.institution}
+                                onChange={(e) => handleChange(i, "institution", e.target.value)}
+                                className="w-full border p-3 mb-3"
                             />
 
-                            {/* Degree */}
-                            <label className="font-medium">Degree/Course</label>
                             <input
-                                type="text"
-                                className="w-full border border-gray-200 rounded-md p-3 mt-2 mb-5"
+                                placeholder="Course"
+                                value={c.course}
+                                onChange={(e) => handleChange(i, "course", e.target.value)}
+                                className="w-full border p-3 mb-3"
                             />
 
-                            {/* Start Date */}
-                            <h3 className="font-semibold mb-2">Start date</h3>
-
-                            <div className="grid grid-cols-2 gap-4 mb-6">
-
-                                <select className="border border-gray-200 rounded-md p-3">
-                                    <option>Month</option>
-                                    <option>January</option>
-                                    <option>February</option>
-                                    <option>March</option>
-                                </select>
-
+                            <div className="grid grid-cols-2 gap-3 mb-3">
                                 <input
-                                    type="number"
-                                    placeholder="Year"
-                                    className="border border-gray-200 rounded-md p-3"
+                                    placeholder="Start Month"
+                                    value={c.start_month}
+                                    onChange={(e) => handleChange(i, "start_month", e.target.value)}
+                                    className="border p-3"
                                 />
-
+                                <input
+                                    placeholder="Start Year"
+                                    value={c.start_year}
+                                    onChange={(e) => handleChange(i, "start_year", e.target.value)}
+                                    className="border p-3"
+                                />
                             </div>
 
-                            {/* End Date */}
-
-                            <h3 className="font-semibold mb-2">End date</h3>
-
-                            <label className="flex items-center gap-2 mb-4">
-                                <input type="checkbox" />
-                                I am currently working in this course
+                            <label className="flex gap-2 mb-2">
+                                <input
+                                    type="checkbox"
+                                    checked={c.currently_studying}
+                                    onChange={(e) =>
+                                        handleChange(i, "currently_studying", e.target.checked)
+                                    }
+                                />
+                                Currently studying
                             </label>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            {!c.currently_studying && (
+                                <div className="grid grid-cols-2 gap-3 mb-3">
+                                    <input
+                                        placeholder="End Month"
+                                        value={c.end_month}
+                                        onChange={(e) => handleChange(i, "end_month", e.target.value)}
+                                        className="border p-3"
+                                    />
+                                    <input
+                                        placeholder="End Year"
+                                        value={c.end_year}
+                                        onChange={(e) => handleChange(i, "end_year", e.target.value)}
+                                        className="border p-3"
+                                    />
+                                </div>
+                            )}
 
-                                <select className="border border-gray-200 rounded-md p-3">
-                                    <option>Month</option>
-                                    <option>January</option>
-                                    <option>February</option>
-                                    <option>March</option>
-                                </select>
+                            <button onClick={() => deleteCourse(i)} className="text-red-500">
+                                Delete
+                            </button>
 
-                                <input
-                                    type="number"
-                                    placeholder="Year"
-                                    className="border border-gray-200 rounded-md p-3"
-                                />
-
-                            </div>
-
-                            {/* Delete */}
-
-                            <div className="flex justify-end mt-6">
-
-                                <button
-                                    onClick={() => deleteCourse(index)}
-                                    className="text-gray-600 flex items-center gap-2"
-                                >
-                                    🗑 Delete course
-                                </button>
-
-                            </div>
-
+                            <hr className="mt-4" />
                         </div>
-
                     ))}
 
-                    {/* Save Button */}
-
-                    <button className="bg-teal-200 text-gray-900 px-8 py-3 rounded-md mb-6">
+                    <button onClick={handleSave} className="bg-teal-300 px-6 py-2 mr-4">
                         Save and continue
                     </button>
 
-                    {/* Add Course */}
-
-                    <div>
-
-                        <button
-                            onClick={addCourse}
-                            className="border-2 border-purple-600 text-purple-600 px-8 py-3 rounded-md"
-                        >
-                            Add course
-                        </button>
-
-                    </div>
+                    <button onClick={addCourse} className="border px-6 py-2">
+                        Add course
+                    </button>
 
                 </div>
-
             </div>
-
         </div>
     )
 }

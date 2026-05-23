@@ -10,9 +10,9 @@ export default function Navbar({ toggleSidebar }: NavbarProps) {
 
     const router = useRouter()
     const handleLogout = () => {
-        localStorage.removeItem("isLoggedIn")
-        router.push("/login")
-    }
+        localStorage.clear();
+        window.location.href = "/login"; // hard redirect (good)
+    };
 
     return (
         <div className="flex items-center justify-between bg-white px-4 md:px-6 py-3 border-b">

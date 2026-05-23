@@ -1,19 +1,100 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import ProfileSidebar from "../../ProfileSidebar"
+
+type Job = {
+    job_title: string
+    company: string
+    start_month: string
+    start_year: string
+    end_month: string
+    end_year: string
+    currently_working: boolean
+}
 
 export default function WorkHistoryPage() {
 
-    const [jobs, setJobs] = useState([1])
+    const [jobs, setJobs] = useState<Job[]>([])
+
+    // 🔥 GET USER ID (NO HARDCODING)
+    const user_id =
+        typeof window !== "undefined"
+            ? localStorage.getItem("user_id")
+            : null
+
+    // 🔥 INITIAL LOAD
+    useEffect(() => {
+        if (!user_id) return
+
+        fetch(`http://localhost/ndis-backend/controllers/get_work_history.php?user_id=${user_id}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success" && data.jobs.length > 0) {
+                    setJobs(data.jobs)
+                } else {
+                    addJob() // start with one empty form
+                }
+            })
+    }, [user_id])
 
     const addJob = () => {
-        setJobs([...jobs, jobs.length + 1])
+        setJobs([
+            ...jobs,
+            {
+                job_title: "",
+                company: "",
+                start_month: "",
+                start_year: "",
+                end_month: "",
+                end_year: "",
+                currently_working: false
+            }
+        ])
     }
 
     const deleteJob = (index: number) => {
-        const updated = jobs.filter((_, i) => i !== index)
+        setJobs(jobs.filter((_, i) => i !== index))
+    }
+
+    const handleChange = <K extends keyof Job>(index: number, field: K, value: Job[K]) => {
+        const updated = jobs.map((job, i) =>
+            i === index ? { ...job, [field]: value } : job
+        )
         setJobs(updated)
+    }
+
+    const handleSave = async () => {
+
+        if (!user_id) {
+            alert("User not logged in")
+            return
+        }
+
+        try {
+            const res = await fetch("http://localhost/ndis-backend/controllers/save_work_history.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    user_id: Number(user_id),
+                    jobs
+                })
+            })
+
+            const data = await res.json()
+
+            if (data.status === "success") {
+                alert("Work history saved ✅")
+            } else {
+                alert(data.message)
+            }
+
+        } catch (err) {
+            console.error(err)
+            alert("Something went wrong")
+        }
     }
 
     return (
@@ -26,178 +107,126 @@ export default function WorkHistoryPage() {
 
             <div className="flex gap-6">
 
-                {/* Sidebar */}
-
                 <div className="w-72">
                     <ProfileSidebar />
                 </div>
 
+                <div className="flex-1 bg-white border rounded-lg p-6">
 
-                {/* Right Content */}
-
-                <div className="flex-1 bg-white border border-gray-200 rounded-lg p-6">
-
-
-                    <h2 className="text-2xl font-semibold mb-2">
+                    <h2 className="text-2xl font-semibold mb-4">
                         Work history
                     </h2>
-
-                    <p className="text-gray-600 mb-6">
-                        Enter your work history and experience in the the last five years.
-                    </p>
-
 
                     {jobs.map((job, index) => (
 
                         <div key={index} className="mb-10">
 
-                            {/* Job title */}
-
-                            <label className="block mb-1 font-medium">
-                                Job title/role
-                            </label>
-
+                            {/* Job Title */}
                             <input
-                                className="w-full border border-gray-200 rounded-md p-3 mb-4"
+                                placeholder="Job title"
+                                value={job.job_title}
+                                onChange={(e) => handleChange(index, "job_title", e.target.value)}
+                                className="w-full border p-3 mb-4"
                             />
-
 
                             {/* Company */}
-
-                            <label className="block mb-1 font-medium">
-                                Company
-                            </label>
-
                             <input
-                                className="w-full border border-gray-200 rounded-md p-3 mb-6"
+                                placeholder="Company"
+                                value={job.company}
+                                onChange={(e) => handleChange(index, "company", e.target.value)}
+                                className="w-full border p-3 mb-4"
                             />
 
-
                             {/* Start Date */}
-
-                            <label className="block font-medium mb-2">
-                                Start date
-                            </label>
-
-                            <div className="grid grid-cols-2 gap-4 mb-6">
-
-
-
-                                <select className="border border-gray-200 rounded-md p-3 w-full">
-                                    <option>month</option>
-                                    <option>January</option>
-                                    <option>February</option>
-                                    <option>March</option>
-                                    <option>April</option>
-                                    <option>May</option>
-                                    <option>June</option>
-                                    <option>July</option>
-                                    <option>August</option>
-                                    <option>September</option>
-                                    <option>October</option>
-                                    <option>November</option>
-                                    <option>December</option>
+                            <div className="grid grid-cols-2 gap-4 mb-4">
+                                <select
+                                    value={job.start_month}
+                                    onChange={(e) => handleChange(index, "start_month", e.target.value)}
+                                    className="border p-3"
+                                >
+                                    <option value="">Month</option>
+                                    {[
+                                        "January", "February", "March", "April",
+                                        "May", "June", "July", "August",
+                                        "September", "October", "November", "December"
+                                    ].map(m => <option key={m}>{m}</option>)}
                                 </select>
 
                                 <input
                                     type="number"
                                     placeholder="Year"
-                                    min="1900"
-                                    max="2100"
-                                    className="border border-gray-200 rounded-md p-3 w-full"
+                                    value={job.start_year}
+                                    onChange={(e) => handleChange(index, "start_year", e.target.value)}
+                                    className="border p-3"
                                 />
-
                             </div>
 
+                            {/* Current Job */}
+                            <label className="flex gap-2 mb-3">
+                                <input
+                                    type="checkbox"
+                                    checked={job.currently_working}
+                                    onChange={(e) =>
+                                        handleChange(index, "currently_working", e.target.checked)
+                                    }
+                                />
+                                Currently working
+                            </label>
 
                             {/* End Date */}
+                            {!job.currently_working && (
+                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                    <select
+                                        value={job.end_month}
+                                        onChange={(e) => handleChange(index, "end_month", e.target.value)}
+                                        className="border p-3"
+                                    >
+                                        <option value="">Month</option>
+                                        {[
+                                            "January", "February", "March", "April",
+                                            "May", "June", "July", "August",
+                                            "September", "October", "November", "December"
+                                        ].map(m => <option key={m}>{m}</option>)}
+                                    </select>
 
-                            <label className="block font-medium mb-2">
-                                End date
-                            </label>
+                                    <input
+                                        type="number"
+                                        placeholder="Year"
+                                        value={job.end_year}
+                                        onChange={(e) => handleChange(index, "end_year", e.target.value)}
+                                        className="border p-3"
+                                    />
+                                </div>
+                            )}
 
-                            <div className="flex items-center gap-2 mb-4">
-                                <input type="checkbox" />
-                                <span>I am currently working in this role</span>
-                            </div>
+                            {/* Delete */}
+                            <button
+                                onClick={() => deleteJob(index)}
+                                className="text-red-500 mb-4"
+                            >
+                                Delete job
+                            </button>
 
-
-                            <div className="grid grid-cols-2 gap-4 mb-6">
-
-
-                                <select className="border border-gray-200 rounded-md p-3 w-full">
-                                    <option>month</option>
-                                    <option>January</option>
-                                    <option>February</option>
-                                    <option>March</option>
-                                    <option>April</option>
-                                    <option>May</option>
-                                    <option>June</option>
-                                    <option>July</option>
-                                    <option>August</option>
-                                    <option>September</option>
-                                    <option>October</option>
-                                    <option>November</option>
-                                    <option>December</option>
-                                </select>
-
-                                <input
-                                    type="number"
-                                    placeholder="Year"
-                                    min="1900"
-                                    max="2100"
-                                    className="border border-gray-200 rounded-md p-3 w-full"
-                                />
-
-                            </div>
-
-
-                            {/* Delete Job */}
-
-                            <div className="flex justify-end text-gray-500 mb-6">
-
-                                <button
-                                    onClick={() => deleteJob(index)}
-                                    className="flex items-center gap-2"
-                                >
-                                    🗑 Delete job
-                                </button>
-
-                            </div>
-
-                            <hr className="mb-6" />
-
+                            <hr />
                         </div>
-
                     ))}
 
-
-                    {/* Save button */}
-
-                    <button className="bg-teal-200 text-gray-900 px-8 py-3 rounded-md mb-6">
+                    <button
+                        onClick={handleSave}
+                        className="bg-teal-300 px-6 py-3 rounded mb-4"
+                    >
                         Save and continue
                     </button>
 
-
-                    {/* Add Work History */}
-
-                    <div>
-
-                        <button
-                            onClick={addJob}
-                            className="border-8 border-purple-600 text-purple-600 bg-purple-50 hover:bg-purple-600 px-8 py-3 rounded-md"
-                        >
-                            Add work history
-                        </button>
-
-                    </div>
-
+                    <button
+                        onClick={addJob}
+                        className="border px-6 py-3 rounded"
+                    >
+                        Add work history
+                    </button>
 
                 </div>
-
             </div>
-
         </div>
-
     )
 }

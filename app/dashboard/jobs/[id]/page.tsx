@@ -13,7 +13,7 @@ export default function JobDetailsPage() {
 
 
     useEffect(() => {
-        fetch(`http://localhost/ndis-backend/controllers/jobs.php?id=${id}`)
+        fetch(`http://54.206.186.109/ndis-backend/controllers/jobs.php?id=${id}`)
             .then(res => res.json())
             .then(data => setJob(data));
     }, [id]);
@@ -33,7 +33,7 @@ export default function JobDetailsPage() {
             const user = JSON.parse(userString);
 
             const res = await fetch(
-                "http://localhost/ndis-backend/controllers/apply.php",
+                "http://54.206.186.109/ndis-backend/controllers/apply.php",
                 {
                     method: "POST",
                     headers: {

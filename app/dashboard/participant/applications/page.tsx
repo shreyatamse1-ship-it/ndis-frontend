@@ -18,7 +18,7 @@ export default function ApplicationsPage() {
 
         console.log("FINAL USER ID:", userId);
 
-        fetch(`http://localhost/ndis-backend/controllers/get_application.php?user_id=${userId}`)
+        fetch(`http://54.206.186.109/ndis-backend/controllers/get_application.php?user_id=${userId}`)
             .then((res) => res.json())
             .then((data) => {
                 console.log("APPLICATION DATA:", data);
@@ -28,13 +28,16 @@ export default function ApplicationsPage() {
 
     const updateStatus = async (id: number, status: string) => {
         const res = await fetch(
-            "http://localhost/ndis-backend/controllers/update_application_status.php",
+            "http://54.206.186.109/ndis-backend/controllers/update_application_status.php",
             {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ id, status }),
+                body: JSON.stringify({
+                    application_id: id,
+                    status
+                }),
             }
         );
 
@@ -106,10 +109,10 @@ export default function ApplicationsPage() {
                                         </span>
                                         <span
                                             className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${app.status === "accepted"
-                                                    ? "bg-green-100 text-green-800"
-                                                    : app.status === "rejected"
-                                                        ? "bg-red-100 text-red-800"
-                                                        : "bg-yellow-100 text-yellow-800"
+                                                ? "bg-green-100 text-green-800"
+                                                : app.status === "rejected"
+                                                    ? "bg-red-100 text-red-800"
+                                                    : "bg-yellow-100 text-yellow-800"
                                                 }`}
                                         >
                                             {app.status.charAt(0).toUpperCase() +

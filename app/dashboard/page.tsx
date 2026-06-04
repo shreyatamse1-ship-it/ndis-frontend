@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+const apiBaseUrl =
+    process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") || "";
 
 export default function DashboardPage() {
     const [isReady, setIsReady] = useState(false);
@@ -50,7 +52,7 @@ export default function DashboardPage() {
 
         setIsReady(true);
 
-        fetch(`http://localhost/ndis-backend/controllers/getWorkerStats.php?user_id=${userId}`)
+        fetch(`${apiBaseUrl}/ndis-backend/controllers/getWorkerStats.php?user_id=${userId}`)
             .then(res => res.json())
             .then(data => setStats(data))
             .catch(err => console.error(err));

@@ -41,7 +41,7 @@ export default function LocationsPage() {
         const user = getUser()
         if (!user?.id) return
 
-        fetch(`http://localhost/ndis-backend/controllers/get_locations.php?user_id=${user.id}`)
+        fetch(`http://54.206.186.109/ndis-backend/controllers/get_locations.php?user_id=${user.id}`)
             .then(res => res.json())
             .then(data => {
                 if (data?.locations) {
@@ -98,7 +98,7 @@ export default function LocationsPage() {
         }
 
         try {
-            const res = await fetch("http://localhost/ndis-backend/controllers/update_locations.php", {
+            const res = await fetch("http://54.206.186.109/ndis-backend/controllers/update_locations.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

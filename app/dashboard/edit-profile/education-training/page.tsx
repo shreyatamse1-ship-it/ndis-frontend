@@ -25,7 +25,7 @@ export default function EducationPage() {
     useEffect(() => {
         if (!user_id) return
 
-        fetch(`http://localhost/ndis-backend/controllers/get_education.php?user_id=${user_id}`)
+        fetch(`http://54.206.186.109/ndis-backend/controllers/get_education.php?user_id=${user_id}`)
             .then(res => res.json())
             .then(data => {
                 if (data.status === "success" && data.courses.length > 0) {
@@ -68,7 +68,7 @@ export default function EducationPage() {
             return
         }
 
-        const res = await fetch("http://localhost/ndis-backend/controllers/save_education.php", {
+        const res = await fetch("http://54.206.186.109/ndis-backend/controllers/save_education.php", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

@@ -17,7 +17,7 @@ export default function PostJobPage() {
         description: "",
     });
     useEffect(() => {
-        fetch("http://localhost/ndis-backend/controllers/getServices.php")
+        fetch("http://54.206.186.109/ndis-backend/controllers/getServices.php")
             .then(res => res.json())
             .then(data => {
                 console.log("SERVICES:", data);
@@ -62,7 +62,7 @@ export default function PostJobPage() {
 
         try {
             const res = await fetch(
-                "http://localhost/ndis-backend/controllers/postJob.php",
+                "http://54.206.186.109/ndis-backend/controllers/postJob.php",
                 {
                     method: "POST",
                     headers: {

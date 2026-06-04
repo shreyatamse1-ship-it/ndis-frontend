@@ -5,7 +5,7 @@ import { useState, useEffect } from "react"
 // ✅ API BASE
 const apiBaseUrl =
     process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ||
-    "http://localhost/ndis-backend/controllers"
+    "http://54.206.186.109/ndis-backend/controllers"
 
 // ✅ TYPE DEFINITIONS
 type PrefKey =

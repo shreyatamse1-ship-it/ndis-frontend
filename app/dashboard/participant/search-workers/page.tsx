@@ -19,7 +19,7 @@ export default function SearchWorkers() {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        fetch("http://localhost/ndis-backend/controllers/get_workers.php")
+        fetch("http://54.206.186.109/ndis-backend/controllers/get_workers.php")
             .then(res => res.json())
             .then(data => {
                 setWorkers(data)

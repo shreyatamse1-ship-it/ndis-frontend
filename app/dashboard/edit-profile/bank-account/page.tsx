@@ -33,7 +33,7 @@ export default function BankAccountPage() {
         }
 
         try {
-            const res = await fetch("http://localhost/ndis-backend/controllers/save_bank.php", {
+            const res = await fetch("http://54.206.186.109/ndis-backend/controllers/save_bank.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

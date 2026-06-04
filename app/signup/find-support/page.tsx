@@ -26,9 +26,154 @@ export default function FindSupport() {
 
     const [flow, setFlow] = useState<"assist" | "me" | "client" | null>(null);
     const [step, setStep] = useState(1);
+    const [error, setError] = useState("");
+    const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+    const [suburbFilter, setSuburbFilter] = useState("");
     const router = useRouter();
 
     const card = "bg-white p-8 rounded-xl shadow-md w-full max-w-md";
+
+    // Australian suburbs data
+    const australianSuburbs = [
+        // NSW
+        "Putney",
+        "Parramatta",
+        "Ryde",
+        "Chatswood",
+        "North Sydney",
+        "Bondi",
+        "Bondi Junction",
+        "Coogee",
+        "Maroubra",
+        "Newtown",
+        "Marrickville",
+        "Surry Hills",
+        "Redfern",
+        "Alexandria",
+        "Zetland",
+        "Waterloo",
+        "Ashfield",
+        "Burwood",
+        "Strathfield",
+        "Epping",
+        "Blacktown",
+        "Liverpool",
+        "Penrith",
+        "Campbelltown",
+        "Cronulla",
+        "Manly",
+        "Mosman",
+        "Lane Cove",
+        "Hornsby",
+
+        // VIC
+        "Richmond",
+        "St Kilda",
+        "South Yarra",
+        "Footscray",
+        "Carlton",
+        "Docklands",
+        "Brunswick",
+        "Fitzroy",
+        "Preston",
+        "Reservoir",
+        "Coburg",
+        "Essendon",
+        "Glen Waverley",
+        "Box Hill",
+        "Clayton",
+        "Dandenong",
+        "Frankston",
+        "Sunshine",
+        "Werribee",
+        "Point Cook",
+
+        // QLD
+        "South Brisbane",
+        "West End",
+        "Fortitude Valley",
+        "New Farm",
+        "Chermside",
+        "Carindale",
+        "Logan Central",
+        "Springwood",
+        "Ipswich",
+        "Redcliffe",
+        "Cleveland",
+        "Southport",
+        "Surfers Paradise",
+        "Broadbeach",
+        "Coolangatta",
+
+        // WA
+        "Fremantle",
+        "Joondalup",
+        "Subiaco",
+        "Cannington",
+        "Morley",
+        "Midland",
+        "Rockingham",
+        "Mandurah",
+
+        // SA
+        "Norwood",
+        "Glenelg",
+        "Prospect",
+        "Mawson Lakes",
+        "Unley",
+
+        // TAS
+        "Sandy Bay",
+        "Kingston",
+        "Launceston",
+        "Devonport",
+
+        // ACT
+        "Belconnen",
+        "Gungahlin",
+        "Tuggeranong",
+        "Woden"
+    ];
+
+    // Remove duplicates and sort
+    const uniqueSuburbs = Array.from(new Set(australianSuburbs)).sort();
+
+    // Filtered suburbs based on search
+    const filteredSuburbs = uniqueSuburbs.filter(suburb =>
+        suburb.toLowerCase().includes(suburbFilter.toLowerCase())
+    );
+
+    // Validation functions
+    const isValidEmail = (email: string): boolean => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    const isValidPassword = (password: string): boolean => {
+        return password.length >= 6;
+    };
+
+    // Check if email already exists
+    const checkEmailExists = async (email: string): Promise<boolean> => {
+        try {
+            setIsCheckingEmail(true);
+            const res = await fetch("http://54.206.186.109/ndis-backend/controllers/check_email.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await res.json();
+            return data.exists || false;
+        } catch (err) {
+            console.error("Error checking email:", err);
+            return false;
+        } finally {
+            setIsCheckingEmail(false);
+        }
+    };
 
     const Button = ({ text, onClick }: any) => (
         <button
@@ -72,11 +217,38 @@ export default function FindSupport() {
                                     className="w-full border p-3 mb-4"
                                     placeholder="Enter email"
                                     value={formData.email}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, email: e.target.value })
-                                    }
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, email: e.target.value });
+                                        setError("");
+                                    }}
                                 />
-                                <button className="bg-teal-400 px-6 py-2 rounded" onClick={() => setStep(2)}>Next</button>
+                                {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+                                <button
+                                    className="bg-teal-400 px-6 py-2 rounded disabled:opacity-50"
+                                    disabled={isCheckingEmail}
+                                    onClick={async () => {
+                                        if (!formData.email.trim()) {
+                                            setError("Email is required");
+                                            return;
+                                        }
+                                        if (!isValidEmail(formData.email)) {
+                                            setError("Please enter a valid email address");
+                                            return;
+                                        }
+
+                                        // Check if email already exists
+                                        const emailExists = await checkEmailExists(formData.email);
+                                        if (emailExists) {
+                                            setError("This email is already signed in with an existing account");
+                                            return;
+                                        }
+
+                                        setError("");
+                                        setStep(2);
+                                    }}
+                                >
+                                    {isCheckingEmail ? "Checking..." : "Next"}
+                                </button>
                             </>
                         )}
 
@@ -89,20 +261,39 @@ export default function FindSupport() {
                                     className="w-full border p-3 mb-3"
                                     placeholder="First name"
                                     value={formData.first_name}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, first_name: e.target.value })
-                                    }
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, first_name: e.target.value });
+                                        setError("");
+                                    }}
                                 />
 
                                 <input
                                     className="w-full border p-3 mb-4"
                                     placeholder="Last name"
                                     value={formData.last_name}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, last_name: e.target.value })
-                                    }
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, last_name: e.target.value });
+                                        setError("");
+                                    }}
                                 />
-                                <button className="bg-teal-400 px-6 py-2 rounded" onClick={() => setStep(3)}>Next</button>
+                                {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+                                <button
+                                    className="bg-teal-400 px-6 py-2 rounded"
+                                    onClick={() => {
+                                        if (!formData.first_name.trim()) {
+                                            setError("First name is required");
+                                            return;
+                                        }
+                                        if (!formData.last_name.trim()) {
+                                            setError("Last name is required");
+                                            return;
+                                        }
+                                        setError("");
+                                        setStep(3);
+                                    }}
+                                >
+                                    Next
+                                </button>
                             </>
                         )}
 
@@ -181,15 +372,50 @@ export default function FindSupport() {
                                 <h2 className="text-xl font-bold mb-6">
                                     What suburb will support take place?
                                 </h2>
-                                <input
-                                    className="w-full border p-3 mb-4"
-                                    placeholder="Enter suburb"
-                                    value={formData.suburb}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, suburb: e.target.value })
-                                    }
-                                />
-                                <button className="bg-teal-400 px-6 py-2 rounded" onClick={() => setStep(6)}>Next</button>
+                                <div className="relative mb-4">
+                                    <input
+                                        className="w-full border p-3 mb-2"
+                                        placeholder="Search suburb..."
+                                        value={suburbFilter}
+                                        onChange={(e) => setSuburbFilter(e.target.value)}
+                                    />
+                                    <div className="border rounded max-h-48 overflow-y-auto bg-white">
+                                        {filteredSuburbs.length > 0 ? (
+                                            filteredSuburbs.map((suburb) => (
+                                                <button
+                                                    key={suburb}
+                                                    onClick={() => {
+                                                        setFormData({ ...formData, suburb });
+                                                        setSuburbFilter("");
+                                                        setError("");
+                                                    }}
+                                                    className="w-full text-left p-3 hover:bg-teal-100 border-b"
+                                                >
+                                                    {suburb}
+                                                </button>
+                                            ))
+                                        ) : (
+                                            <div className="p-3 text-gray-500">No suburbs found</div>
+                                        )}
+                                    </div>
+                                </div>
+                                {formData.suburb && (
+                                    <p className="text-sm text-teal-600 mb-4">Selected: {formData.suburb}</p>
+                                )}
+                                {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+                                <button
+                                    className="bg-teal-400 px-6 py-2 rounded"
+                                    onClick={() => {
+                                        if (!formData.suburb.trim()) {
+                                            setError("Suburb is required");
+                                            return;
+                                        }
+                                        setError("");
+                                        setStep(6);
+                                    }}
+                                >
+                                    Next
+                                </button>
                             </>
                         )}
 
@@ -225,40 +451,79 @@ export default function FindSupport() {
                                     className="w-full border p-3 mb-3"
                                     placeholder="First name"
                                     value={formData.first_name}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, first_name: e.target.value })
-                                    }
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, first_name: e.target.value });
+                                        setError("");
+                                    }}
                                 />
                                 <input
                                     className="w-full border p-3 mb-3"
                                     placeholder="Last name"
                                     value={formData.last_name}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, last_name: e.target.value })
-                                    }
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, last_name: e.target.value });
+                                        setError("");
+                                    }}
                                 />
                                 <input
                                     className="w-full border p-3 mb-3"
                                     placeholder="Email"
                                     value={formData.email}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, email: e.target.value })
-                                    }
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, email: e.target.value });
+                                        setError("");
+                                    }}
                                 />
                                 <input
                                     type="password"
                                     className="w-full border p-3 mb-4"
                                     placeholder="Password"
                                     value={formData.password}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, password: e.target.value })
-                                    }
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, password: e.target.value });
+                                        setError("");
+                                    }}
                                 />
+                                {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
                                 <button
-                                    className="bg-teal-400 px-6 py-2 rounded"
+                                    className="bg-teal-400 px-6 py-2 rounded disabled:opacity-50"
+                                    disabled={isCheckingEmail}
                                     onClick={async () => {
+                                        if (!formData.first_name.trim()) {
+                                            setError("First name is required");
+                                            return;
+                                        }
+                                        if (!formData.last_name.trim()) {
+                                            setError("Last name is required");
+                                            return;
+                                        }
+                                        if (!formData.email.trim()) {
+                                            setError("Email is required");
+                                            return;
+                                        }
+                                        if (!isValidEmail(formData.email)) {
+                                            setError("Please enter a valid email address");
+                                            return;
+                                        }
+
+                                        // Check if email already exists
+                                        const emailExists = await checkEmailExists(formData.email);
+                                        if (emailExists) {
+                                            setError("This email is already signed in with an existing account");
+                                            return;
+                                        }
+
+                                        if (!formData.password.trim()) {
+                                            setError("Password is required");
+                                            return;
+                                        }
+                                        if (!isValidPassword(formData.password)) {
+                                            setError("Password must be at least 6 characters long");
+                                            return;
+                                        }
+
                                         try {
-                                            const res = await fetch("http://localhost/ndis-backend/controllers/participant_signup.php", {
+                                            const res = await fetch("http://54.206.186.109/ndis-backend/controllers/participant_signup.php", {
                                                 method: "POST",
                                                 headers: {
                                                     "Content-Type": "application/json",
@@ -279,12 +544,12 @@ export default function FindSupport() {
                                                     router.push("/dashboard");
                                                 }
                                             } else {
-                                                alert(data.message);
+                                                setError(data.message || "Signup failed");
                                             }
 
                                         } catch (err) {
                                             console.error(err);
-                                            alert("Network error");
+                                            setError("Network error");
                                         }
                                     }}
                                 >
@@ -342,15 +607,50 @@ export default function FindSupport() {
                                 <h2 className="text-xl font-bold mb-6">
                                     Location
                                 </h2>
-                                <input
-                                    className="w-full border p-3 mb-4"
-                                    placeholder="Enter suburb"
-                                    value={formData.suburb}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, suburb: e.target.value })
-                                    }
-                                />
-                                <button className="bg-teal-400 px-6 py-2 rounded" onClick={() => setStep(4)}>Next</button>
+                                <div className="relative mb-4">
+                                    <input
+                                        className="w-full border p-3 mb-2"
+                                        placeholder="Search suburb..."
+                                        value={suburbFilter}
+                                        onChange={(e) => setSuburbFilter(e.target.value)}
+                                    />
+                                    <div className="border rounded max-h-48 overflow-y-auto bg-white">
+                                        {filteredSuburbs.length > 0 ? (
+                                            filteredSuburbs.map((suburb) => (
+                                                <button
+                                                    key={suburb}
+                                                    onClick={() => {
+                                                        setFormData({ ...formData, suburb });
+                                                        setSuburbFilter("");
+                                                        setError("");
+                                                    }}
+                                                    className="w-full text-left p-3 hover:bg-teal-100 border-b"
+                                                >
+                                                    {suburb}
+                                                </button>
+                                            ))
+                                        ) : (
+                                            <div className="p-3 text-gray-500">No suburbs found</div>
+                                        )}
+                                    </div>
+                                </div>
+                                {formData.suburb && (
+                                    <p className="text-sm text-teal-600 mb-4">Selected: {formData.suburb}</p>
+                                )}
+                                {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+                                <button
+                                    className="bg-teal-400 px-6 py-2 rounded"
+                                    onClick={() => {
+                                        if (!formData.suburb.trim()) {
+                                            setError("Suburb is required");
+                                            return;
+                                        }
+                                        setError("");
+                                        setStep(4);
+                                    }}
+                                >
+                                    Next
+                                </button>
                             </>
                         )}
 
@@ -368,9 +668,10 @@ export default function FindSupport() {
                                         type="text"
                                         placeholder="First name"
                                         value={formData.first_name}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, first_name: e.target.value })
-                                        }
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, first_name: e.target.value });
+                                            setError("");
+                                        }}
                                         className="border p-3 rounded w-full"
                                     />
 
@@ -378,9 +679,10 @@ export default function FindSupport() {
                                         type="text"
                                         placeholder="Last name"
                                         value={formData.last_name}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, last_name: e.target.value })
-                                        }
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, last_name: e.target.value });
+                                            setError("");
+                                        }}
                                         className="border p-3 rounded w-full"
                                     />
                                 </div>
@@ -390,9 +692,10 @@ export default function FindSupport() {
                                     type="email"
                                     placeholder="Email"
                                     value={formData.email}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, email: e.target.value })
-                                    }
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, email: e.target.value });
+                                        setError("");
+                                    }}
                                     className="w-full border p-3 rounded mb-4"
                                 />
 
@@ -401,19 +704,56 @@ export default function FindSupport() {
                                     type="password"
                                     placeholder="Password"
                                     value={formData.password}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, password: e.target.value })
-                                    }
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, password: e.target.value });
+                                        setError("");
+                                    }}
                                     className="w-full border p-3 rounded mb-6"
                                 />
 
+                                {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+
                                 {/* Button */}
                                 <button
-                                    className="w-full bg-teal-500 text-white py-3 rounded-lg font-semibold hover:bg-teal-600 transition"
+                                    className="w-full bg-teal-500 text-white py-3 rounded-lg font-semibold hover:bg-teal-600 transition disabled:opacity-50"
+                                    disabled={isCheckingEmail}
                                     onClick={async () => {
+                                        if (!formData.first_name.trim()) {
+                                            setError("First name is required");
+                                            return;
+                                        }
+                                        if (!formData.last_name.trim()) {
+                                            setError("Last name is required");
+                                            return;
+                                        }
+                                        if (!formData.email.trim()) {
+                                            setError("Email is required");
+                                            return;
+                                        }
+                                        if (!isValidEmail(formData.email)) {
+                                            setError("Please enter a valid email address");
+                                            return;
+                                        }
+
+                                        // Check if email already exists
+                                        const emailExists = await checkEmailExists(formData.email);
+                                        if (emailExists) {
+                                            setError("This email is already signed in with an existing account");
+                                            return;
+                                        }
+
+                                        if (!formData.password.trim()) {
+                                            setError("Password is required");
+                                            return;
+                                        }
+                                        if (!isValidPassword(formData.password)) {
+                                            setError("Password must be at least 6 characters long");
+                                            return;
+                                        }
+
                                         try {
                                             const res = await fetch(
-                                                "http://localhost/ndis-backend/controllers/client_signup.php",
+                                                "http://54.206.186.109/ndis-backend/controllers/client_signup.php",
                                                 {
                                                     method: "POST",
                                                     headers: {
@@ -432,11 +772,11 @@ export default function FindSupport() {
                                                 localStorage.setItem("userName", data.name);
                                                 router.push("/dashboard");
                                             } else {
-                                                alert(data.message);
+                                                setError(data.message || "Signup failed");
                                             }
                                         } catch (err) {
                                             console.error(err);
-                                            alert("Network error");
+                                            setError("Network error");
                                         }
                                     }}
                                 >
@@ -460,6 +800,8 @@ export default function FindSupport() {
                                     Enter coordinator details below
                                 </h3>
 
+                                {error && <p className="text-red-500 text-sm mb-6 bg-red-50 p-3 rounded">{error}</p>}
+
                                 <div className="space-y-5">
 
                                     {/* EMAIL */}
@@ -467,9 +809,10 @@ export default function FindSupport() {
                                         className="w-full border border-gray-300 p-4 rounded-lg"
                                         placeholder="Business email"
                                         value={formData.email}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, email: e.target.value })
-                                        }
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, email: e.target.value });
+                                            setError("");
+                                        }}
                                     />
 
                                     {/* PASSWORD */}
@@ -478,9 +821,10 @@ export default function FindSupport() {
                                         className="w-full border border-gray-300 p-4 rounded-lg"
                                         placeholder="Password"
                                         value={formData.password}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, password: e.target.value })
-                                        }
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, password: e.target.value });
+                                            setError("");
+                                        }}
                                     />
 
                                     <p className="text-sm text-gray-500">
@@ -492,9 +836,10 @@ export default function FindSupport() {
                                         className="w-full border border-gray-300 p-4 rounded-lg"
                                         placeholder="First name"
                                         value={formData.first_name}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, first_name: e.target.value })
-                                        }
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, first_name: e.target.value });
+                                            setError("");
+                                        }}
                                     />
 
                                     {/* LAST NAME */}
@@ -502,9 +847,10 @@ export default function FindSupport() {
                                         className="w-full border border-gray-300 p-4 rounded-lg"
                                         placeholder="Last name"
                                         value={formData.last_name}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, last_name: e.target.value })
-                                        }
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, last_name: e.target.value });
+                                            setError("");
+                                        }}
                                     />
 
                                     {/* ADDRESS */}
@@ -512,29 +858,54 @@ export default function FindSupport() {
                                         className="w-full border border-gray-300 p-4 rounded-lg"
                                         placeholder="Street Address"
                                         value={formData.address}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, address: e.target.value })
-                                        }
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, address: e.target.value });
+                                            setError("");
+                                        }}
                                     />
 
                                     {/* SUBURB */}
-                                    <input
-                                        className="w-full border border-gray-300 p-4 rounded-lg"
-                                        placeholder="Suburb / State / Postcode"
-                                        value={formData.suburb}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, suburb: e.target.value })
-                                        }
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            className="w-full border border-gray-300 p-4 rounded-lg"
+                                            placeholder="Search suburb..."
+                                            value={suburbFilter}
+                                            onChange={(e) => setSuburbFilter(e.target.value)}
+                                        />
+                                        {suburbFilter && (
+                                            <div className="border border-gray-300 rounded-lg max-h-48 overflow-y-auto bg-white absolute w-full z-10 mt-1">
+                                                {filteredSuburbs.length > 0 ? (
+                                                    filteredSuburbs.map((suburb) => (
+                                                        <button
+                                                            key={suburb}
+                                                            onClick={() => {
+                                                                setFormData({ ...formData, suburb });
+                                                                setSuburbFilter("");
+                                                            }}
+                                                            className="w-full text-left p-3 hover:bg-teal-100 border-b"
+                                                        >
+                                                            {suburb}
+                                                        </button>
+                                                    ))
+                                                ) : (
+                                                    <div className="p-3 text-gray-500">No suburbs found</div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                    {formData.suburb && (
+                                        <p className="text-sm text-teal-600">Selected: {formData.suburb}</p>
+                                    )}
 
                                     {/* PHONE */}
                                     <input
                                         className="w-full border border-gray-300 p-4 rounded-lg"
                                         placeholder="Mobile number"
                                         value={formData.phone}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, phone: e.target.value })
-                                        }
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, phone: e.target.value });
+                                            setError("");
+                                        }}
                                     />
 
                                     {/* ORGANISATION */}
@@ -542,18 +913,20 @@ export default function FindSupport() {
                                         className="w-full border border-gray-300 p-4 rounded-lg"
                                         placeholder="Organisation name"
                                         value={formData.organisation}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, organisation: e.target.value })
-                                        }
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, organisation: e.target.value });
+                                            setError("");
+                                        }}
                                     />
 
                                     {/* CLIENT TYPE */}
                                     <select
                                         className="w-full border border-gray-300 p-4 rounded-lg"
                                         value={formData.client_type}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, client_type: e.target.value })
-                                        }
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, client_type: e.target.value });
+                                            setError("");
+                                        }}
                                     >
                                         <option value="">Select type of clients</option>
                                         <option value="NDIS Participants">NDIS Participants</option>
@@ -565,9 +938,10 @@ export default function FindSupport() {
                                     <select
                                         className="w-full border border-gray-300 p-4 rounded-lg"
                                         value={formData.role}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, role: e.target.value })
-                                        }
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, role: e.target.value });
+                                            setError("");
+                                        }}
                                     >
                                         <option value="">Select what best describes you</option>
                                         <option value="Support Coordinator">Support Coordinator</option>
@@ -585,9 +959,10 @@ export default function FindSupport() {
                                             <input
                                                 type="radio"
                                                 checked={formData.has_clients === "Yes"}
-                                                onChange={() =>
-                                                    setFormData({ ...formData, has_clients: "Yes" })
-                                                }
+                                                onChange={() => {
+                                                    setFormData({ ...formData, has_clients: "Yes" });
+                                                    setError("");
+                                                }}
                                             />{" "}
                                             Yes
                                         </label>
@@ -596,9 +971,10 @@ export default function FindSupport() {
                                             <input
                                                 type="radio"
                                                 checked={formData.has_clients === "No"}
-                                                onChange={() =>
-                                                    setFormData({ ...formData, has_clients: "No" })
-                                                }
+                                                onChange={() => {
+                                                    setFormData({ ...formData, has_clients: "No" });
+                                                    setError("");
+                                                }}
                                             />{" "}
                                             No
                                         </label>
@@ -612,13 +988,71 @@ export default function FindSupport() {
 
                                     {/* BUTTON */}
                                     <button
-                                        className="bg-teal-400 text-black px-8 py-4 rounded-lg text-lg w-full"
+                                        className="bg-teal-400 text-black px-8 py-4 rounded-lg text-lg w-full disabled:opacity-50"
+                                        disabled={isCheckingEmail}
                                         onClick={async () => {
+                                            if (!formData.email.trim()) {
+                                                setError("Email is required");
+                                                return;
+                                            }
+                                            if (!isValidEmail(formData.email)) {
+                                                setError("Please enter a valid email address");
+                                                return;
+                                            }
+
+                                            // Check if email already exists
+                                            const emailExists = await checkEmailExists(formData.email);
+                                            if (emailExists) {
+                                                setError("This email is already signed in with an existing account");
+                                                return;
+                                            }
+
+                                            if (!formData.password.trim()) {
+                                                setError("Password is required");
+                                                return;
+                                            }
+                                            if (!formData.first_name.trim()) {
+                                                setError("First name is required");
+                                                return;
+                                            }
+                                            if (!formData.last_name.trim()) {
+                                                setError("Last name is required");
+                                                return;
+                                            }
+                                            if (!formData.address.trim()) {
+                                                setError("Address is required");
+                                                return;
+                                            }
+                                            if (!formData.suburb.trim()) {
+                                                setError("Suburb is required");
+                                                return;
+                                            }
+                                            if (!formData.phone.trim()) {
+                                                setError("Phone number is required");
+                                                return;
+                                            }
+                                            if (!formData.organisation.trim()) {
+                                                setError("Organisation name is required");
+                                                return;
+                                            }
+                                            if (!formData.client_type) {
+                                                setError("Please select type of clients");
+                                                return;
+                                            }
+                                            if (!formData.role) {
+                                                setError("Please select your role");
+                                                return;
+                                            }
+                                            if (!formData.has_clients) {
+                                                setError("Please select if you have clients");
+                                                return;
+                                            }
+
                                             try {
                                                 console.log(formData); // DEBUG
 
                                                 const res = await fetch(
-                                                    "http://localhost/ndis-backend/controllers/client_signup.php",
+                                                    "http://54.206.186.109/ndis-backend/controllers/client_signup.php",
                                                     {
                                                         method: "POST",
                                                         headers: {
@@ -637,11 +1071,11 @@ export default function FindSupport() {
                                                     alert("Client created successfully");
                                                     router.push("/dashboard");
                                                 } else {
-                                                    alert(data.message);
+                                                    setError(data.message || "Signup failed");
                                                 }
                                             } catch (err) {
                                                 console.error(err);
-                                                alert("Network error");
+                                                setError("Network error");
                                             }
                                         }}
                                     >

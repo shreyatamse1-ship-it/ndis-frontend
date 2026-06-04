@@ -53,7 +53,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
         { name: "Jobs", href: "/dashboard/jobs", icon: Briefcase },
         { name: "Manage clients", href: "/dashboard/clients", icon: Users },
         { name: "Support hours", href: "/dashboard/support", icon: Clock },
-        { name: "My clients", href: "/dashboard/myclients", icon: User },
+        { name: "My clients", href: "/dashboard/my-clients", icon: User },
     ];
 
     const participantMenu = [

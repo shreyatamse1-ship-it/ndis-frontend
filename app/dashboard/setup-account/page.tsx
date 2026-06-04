@@ -39,7 +39,7 @@ export default function SetupAccountPage() {
         console.log("SAVE CLICKED");
         console.log("EMAIL:", localStorage.getItem("email"));
 
-        const res = await fetch("http://localhost/ndis-backend/index.php?route=updateProfile", {
+        const res = await fetch("http://54.206.186.109/ndis-backend/index.php?route=updateProfile", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

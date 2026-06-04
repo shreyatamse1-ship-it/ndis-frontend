@@ -33,7 +33,7 @@ export default function PreferredHoursPage() {
         const user = getUser();
         if (!user?.id) return;
 
-        fetch(`http://localhost/ndis-backend/controllers/get_preferred_hours.php?user_id=${user.id}`)
+        fetch(`http://54.206.186.109/ndis-backend/controllers/get_preferred_hours.php?user_id=${user.id}`)
             .then(res => res.json())
             .then(data => {
                 if (data?.preferred_hours) {
@@ -74,7 +74,7 @@ export default function PreferredHoursPage() {
         }
 
         try {
-            const res = await fetch("http://localhost/ndis-backend/controllers/update_preferred_hours.php", {
+            const res = await fetch("http://54.206.186.109/ndis-backend/controllers/update_preferred_hours.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -155,8 +155,8 @@ export default function PreferredHoursPage() {
                                                     key={slot}
                                                     onClick={() => toggleSlot(day, slot)}
                                                     className={`px-5 py-2.5 border-2 rounded-lg text-sm font-medium transition ${selected
-                                                            ? "bg-teal-50 border-teal-500 text-teal-700"
-                                                            : "bg-white border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50"
+                                                        ? "bg-teal-50 border-teal-500 text-teal-700"
+                                                        : "bg-white border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50"
                                                         }`}
                                                 >
                                                     {slot}

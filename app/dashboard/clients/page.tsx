@@ -7,7 +7,7 @@ export default function ManageClientsPage() {
     const [sharedJobs, setSharedJobs] = useState([])
     const [jobsList, setJobsList] = useState([])
     useEffect(() => {
-        fetch("http://localhost/ndis-backend/controllers/get_jobs.php")
+        fetch("http://54.206.186.109/ndis-backend/controllers/get_jobs.php")
             .then(res => res.json())
             .then(data => {
                 setJobsList(data.jobs)
@@ -15,7 +15,7 @@ export default function ManageClientsPage() {
     }, [])
 
     useEffect(() => {
-        fetch("http://localhost/ndis-backend/controllers/get_shared_jobs.php?user_id=1")
+        fetch("http://54.206.186.109/ndis-backend/controllers/get_shared_jobs.php?user_id=1")
             .then(res => res.json())
             .then(data => {
                 console.log("SHARED:", data)
@@ -25,7 +25,7 @@ export default function ManageClientsPage() {
     }, [])
 
     useEffect(() => {
-        fetch("http://localhost/ndis-backend/controllers/get_application.php?user_id=1")
+        fetch("http://54.206.186.109/ndis-backend/controllers/get_application.php?user_id=1")
             .then(res => res.json())
             .then(data => {
                 console.log("APPLIED:", data)
@@ -34,7 +34,7 @@ export default function ManageClientsPage() {
             .catch(err => console.error(err))
     }, [])
     const applyJob = (jobId: number) => {
-        fetch("http://localhost/ndis-backend/controllers/apply_job.php", {
+        fetch("http://54.206.186.109/ndis-backend/controllers/apply_job.php", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -63,7 +63,7 @@ export default function ManageClientsPage() {
 
     // 🔥 ADD THIS FUNCTION
     const handleAction = (id: number, status: string) => {
-        fetch("http://localhost/ndis-backend/controllers/update_application_status.php", {
+        fetch("http://54.206.186.109/ndis-backend/controllers/update_application_status.php", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

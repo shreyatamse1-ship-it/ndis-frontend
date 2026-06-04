@@ -7,6 +7,9 @@ export default function ProvideSupport() {
     const router = useRouter()
 
     const [step, setStep] = useState(1)
+    const [error, setError] = useState("")
+    const [isCheckingEmail, setIsCheckingEmail] = useState(false)
+    const [locationFilter, setLocationFilter] = useState("")
 
     const [formData, setFormData] = useState({
         firstName: "",
@@ -16,6 +19,107 @@ export default function ProvideSupport() {
         password: "",
         location: ""
     })
+
+    // Australian suburbs data
+    const australianSuburbs = [
+        "Putney",
+        "Melbourne",
+        "Sydney",
+        "Brisbane",
+        "Perth",
+        "Adelaide",
+        "Canberra",
+
+        // Melbourne suburbs
+        "Richmond",
+        "South Yarra",
+        "St Kilda",
+        "Footscray",
+        "Carlton",
+        "Docklands",
+        "Brunswick",
+        "Fitzroy",
+        "Prahran",
+        "Toorak",
+        "Hawthorn",
+        "Camberwell",
+        "Box Hill",
+        "Glen Waverley",
+        "Clayton",
+        "Dandenong",
+        "Sunshine",
+        "Werribee",
+        "Point Cook",
+
+        // Sydney suburbs
+        "Putney",
+        "Parramatta",
+        "Ryde",
+        "Chatswood",
+        "Bondi",
+        "Bondi Junction",
+        "Coogee",
+        "Maroubra",
+        "Newtown",
+        "Marrickville",
+        "Surry Hills",
+        "Redfern",
+        "Alexandria",
+        "Zetland",
+        "Waterloo",
+
+        // Brisbane suburbs
+        "South Brisbane",
+        "West End",
+        "Fortitude Valley",
+        "New Farm",
+        "Chermside",
+        "Carindale",
+
+        // Perth suburbs
+        "Fremantle",
+        "Subiaco",
+        "Joondalup",
+        "Midland",
+        "Morley"
+    ];
+
+    const uniqueLocations = Array.from(new Set(australianSuburbs)).sort();
+    const filteredLocations = uniqueLocations.filter(location =>
+        location.toLowerCase().includes(locationFilter.toLowerCase())
+    );
+
+    // Validation functions
+    const isValidEmail = (email: string): boolean => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    const isValidPassword = (password: string): boolean => {
+        return password.length >= 6;
+    };
+
+    // Check if email already exists
+    const checkEmailExists = async (email: string): Promise<boolean> => {
+        try {
+            setIsCheckingEmail(true);
+            const res = await fetch("http://54.206.186.109/ndis-backend/controllers/check_email.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await res.json();
+            return data.exists || false;
+        } catch (err) {
+            console.error("Error checking email:", err);
+            return false;
+        } finally {
+            setIsCheckingEmail(false);
+        }
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
@@ -30,7 +134,7 @@ export default function ProvideSupport() {
     const handleSubmit = async () => {
         try {
             const res = await fetch
-                ("http://localhost/ndis-backend/index.php?route=provider_signup",
+                ("http://54.206.186.109/ndis-backend/index.php?route=provider_signup",
                     {
                         method: "POST",
                         headers: {
@@ -53,21 +157,28 @@ export default function ProvideSupport() {
             const data = text ? JSON.parse(text) : {};
 
             if (data.success) {
+
                 localStorage.setItem(
                     "user",
                     JSON.stringify({
                         id: data.user_id,
-                        name: data.name,
+                        firstName: formData.firstName,
+                        lastName: formData.lastName
                     })
                 );
+
+                localStorage.setItem("user_id", String(data.user_id));
+                localStorage.setItem("role", "support_worker");
+
                 alert("Account created successfully 🚀");
-                router.push("/dashboard");
+
+                router.push("/dashboard/jobs");
             } else {
-                alert(data.message || "Signup failed");
+                setError(data.message || "Signup failed");
             }
         } catch (error) {
             console.error(error);
-            alert("Server error");
+            setError("Server error");
         }
     };
 
@@ -141,13 +252,51 @@ export default function ProvideSupport() {
                             Where are you located?
                         </h2>
 
-                        <input
-                            placeholder="Suburb / state / postcode"
-                            className="border p-3 w-full mb-6"
-                        />
+                        <div className="relative mb-6">
+                            <input
+                                placeholder="Search suburb..."
+                                className="border p-3 w-full mb-2"
+                                value={locationFilter}
+                                onChange={(e) => setLocationFilter(e.target.value)}
+                            />
+                            {locationFilter && (
+                                <div className="border rounded max-h-48 overflow-y-auto bg-white">
+                                    {filteredLocations.length > 0 ? (
+                                        filteredLocations.map((location) => (
+                                            <button
+                                                key={location}
+                                                onClick={() => {
+                                                    setFormData({ ...formData, location });
+                                                    setLocationFilter("");
+                                                    setError("");
+                                                }}
+                                                className="w-full text-left p-3 hover:bg-teal-100 border-b"
+                                            >
+                                                {location}
+                                            </button>
+                                        ))
+                                    ) : (
+                                        <div className="p-3 text-gray-500">No locations found</div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {formData.location && (
+                            <p className="text-sm text-teal-600 mb-4">Selected: {formData.location}</p>
+                        )}
+
+                        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
                         <button
-                            onClick={() => setStep(3)}
+                            onClick={() => {
+                                if (!formData.location.trim()) {
+                                    setError("Location is required");
+                                    return;
+                                }
+                                setError("");
+                                setStep(3);
+                            }}
                             className="bg-teal-200 px-6 py-2 rounded"
                         >
                             Next
@@ -229,13 +378,18 @@ export default function ProvideSupport() {
                             Please provide your details
                         </h2>
 
+                        {error && <p className="text-red-500 text-sm mb-4 bg-red-50 p-3 rounded">{error}</p>}
+
                         <div className="grid grid-cols-2 gap-6">
 
                             <input
                                 name="firstName"
                                 placeholder="First name"
                                 value={formData.firstName}
-                                onChange={handleChange}
+                                onChange={(e) => {
+                                    handleChange(e);
+                                    setError("");
+                                }}
                                 className="border p-3 rounded w-full"
                             />
 
@@ -243,7 +397,10 @@ export default function ProvideSupport() {
                                 name="lastName"
                                 placeholder="Last name"
                                 value={formData.lastName}
-                                onChange={handleChange}
+                                onChange={(e) => {
+                                    handleChange(e);
+                                    setError("");
+                                }}
                                 className="border p-3 rounded w-full"
                             />
 
@@ -251,7 +408,10 @@ export default function ProvideSupport() {
                                 name="email"
                                 placeholder="Email"
                                 value={formData.email}
-                                onChange={handleChange}
+                                onChange={(e) => {
+                                    handleChange(e);
+                                    setError("");
+                                }}
                                 className="border p-3 rounded w-full"
                             />
 
@@ -260,7 +420,10 @@ export default function ProvideSupport() {
                                 name="password"
                                 placeholder="Password"
                                 value={formData.password}
-                                onChange={handleChange}
+                                onChange={(e) => {
+                                    handleChange(e);
+                                    setError("");
+                                }}
                                 className="border p-3 rounded w-full"
                             />
 
@@ -268,15 +431,58 @@ export default function ProvideSupport() {
                                 name="mobile"
                                 placeholder="Mobile number"
                                 value={formData.mobile}
-                                onChange={handleChange}
+                                onChange={(e) => {
+                                    handleChange(e);
+                                    setError("");
+                                }}
                                 className="border p-3 rounded w-full"
                             />
 
                             <button
-                                onClick={handleSubmit}
-                                className="bg-teal-300 hover:bg-teal-400 text-black font-medium px-6 py-3 rounded"
+                                onClick={async () => {
+                                    if (!formData.firstName.trim()) {
+                                        setError("First name is required");
+                                        return;
+                                    }
+                                    if (!formData.lastName.trim()) {
+                                        setError("Last name is required");
+                                        return;
+                                    }
+                                    if (!formData.email.trim()) {
+                                        setError("Email is required");
+                                        return;
+                                    }
+                                    if (!isValidEmail(formData.email)) {
+                                        setError("Please enter a valid email address");
+                                        return;
+                                    }
+
+                                    // Check if email already exists
+                                    const emailExists = await checkEmailExists(formData.email);
+                                    if (emailExists) {
+                                        setError("This email is already signed in with an existing account");
+                                        return;
+                                    }
+
+                                    if (!formData.password.trim()) {
+                                        setError("Password is required");
+                                        return;
+                                    }
+                                    if (!isValidPassword(formData.password)) {
+                                        setError("Password must be at least 6 characters long");
+                                        return;
+                                    }
+                                    if (!formData.mobile.trim()) {
+                                        setError("Mobile number is required");
+                                        return;
+                                    }
+                                    setError("");
+                                    handleSubmit();
+                                }}
+                                disabled={isCheckingEmail}
+                                className="bg-teal-300 hover:bg-teal-400 text-black font-medium px-6 py-3 rounded disabled:opacity-50"
                             >
-                                Create account
+                                {isCheckingEmail ? "Checking..." : "Create account"}
                             </button>
 
                         </div>

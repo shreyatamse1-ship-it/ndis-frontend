@@ -35,7 +35,7 @@ export default function IndicativeRatesPage() {
         const user = getUser();
         if (!user?.id) return;
 
-        fetch(`http://localhost/ndis-backend/controllers/get_indicative_rates.php?user_id=${user.id}`)
+        fetch(`http://54.206.186.109/ndis-backend/controllers/get_indicative_rates.php?user_id=${user.id}`)
             .then(res => res.json())
             .then(data => {
                 if (data?.indicative_rates) {
@@ -59,7 +59,7 @@ export default function IndicativeRatesPage() {
         }
 
         try {
-            const res = await fetch("http://localhost/ndis-backend/controllers/update_indicative_rates.php", {
+            const res = await fetch("http://54.206.186.109/ndis-backend/controllers/update_indicative_rates.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

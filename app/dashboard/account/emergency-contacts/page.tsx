@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 
 const apiBaseUrl =
     process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ||
-    "http://localhost/ndis-backend/controllers"
+    "${apiBaseUrl}/ndis-backend/controllers"
 
 type Contact = {
     id?: number

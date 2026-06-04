@@ -14,7 +14,7 @@ export default function LoginPage() {
         console.log("LOGIN CLICKED", email, password);
 
         const res = await fetch(
-            "http://localhost/ndis-backend/index.php?route=login",
+            "http://54.206.186.109/ndis-backend/index.php?route=login",
             {
                 method: "POST",
                 headers: {

@@ -64,7 +64,7 @@ export default function JobsPage() {
             });
 
             const res = await fetch(
-                `http://localhost/ndis-backend/controllers/jobs.php?${query}`
+                `http://54.206.186.109/ndis-backend/controllers/jobs.php?${query}`
             );
 
             const data = await res.json();

@@ -50,7 +50,7 @@ export default function ParticipantMessagesPage() {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const res = await fetch("http://localhost/ndis-backend/controllers/getUsers.php");
+                const res = await fetch("http://54.206.186.109/ndis-backend/controllers/getUsers.php");
                 const data = await res.json();
                 setUsers(Array.isArray(data) ? data : []);
             } catch (err) {
@@ -66,7 +66,7 @@ export default function ParticipantMessagesPage() {
 
         const fetchConversation = async () => {
             try {
-                const res = await fetch(`http://localhost/ndis-backend/controllers/getMessages.php?sender_id=${userId}&receiver_id=${receiverId}`);
+                const res = await fetch(`http://54.206.186.109/ndis-backend/controllers/getMessages.php?sender_id=${userId}&receiver_id=${receiverId}`);
                 const data = await res.json();
                 setMessages(Array.isArray(data) ? data : []);
             } catch (err) {
@@ -83,7 +83,7 @@ export default function ParticipantMessagesPage() {
         if (!receiverId || !userId || !text.trim()) return;
 
         try {
-            await fetch("http://localhost/ndis-backend/controllers/sendMessage.php", {
+            await fetch("http://54.206.186.109/ndis-backend/controllers/sendMessage.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -96,7 +96,7 @@ export default function ParticipantMessagesPage() {
             });
 
             setText("");
-            const res = await fetch(`http://localhost/ndis-backend/controllers/getMessages.php?sender_id=${userId}&receiver_id=${receiverId}`);
+            const res = await fetch(`http://54.206.186.109/ndis-backend/controllers/getMessages.php?sender_id=${userId}&receiver_id=${receiverId}`);
             const data = await res.json();
             setMessages(Array.isArray(data) ? data : []);
         } catch (err) {

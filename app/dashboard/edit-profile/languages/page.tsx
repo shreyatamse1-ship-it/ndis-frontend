@@ -33,7 +33,7 @@ export default function LanguagesPage() {
     useEffect(() => {
         if (!user_id) return
 
-        fetch(`http://localhost/ndis-backend/controllers/get_languages.php?user_id=${user_id}`)
+        fetch(`http:/54.206.186.109//ndis-backend/controllers/get_languages.php?user_id=${user_id}`)
             .then(res => res.json())
             .then(data => {
                 if (data.status === "success") {
@@ -51,7 +51,7 @@ export default function LanguagesPage() {
         }
 
         try {
-            const res = await fetch("http://localhost/ndis-backend/controllers/save_languages.php", {
+            const res = await fetch("http://54.206.186.109/ndis-backend/controllers/save_languages.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

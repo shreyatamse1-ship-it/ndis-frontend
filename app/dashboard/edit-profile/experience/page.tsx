@@ -53,7 +53,7 @@ export default function ExperiencePage() {
         };
 
         try {
-            const res = await fetch("http://localhost/ndis-backend/controllers/save_experience.php", {
+            const res = await fetch("http://54.206.186.109/ndis-backend/controllers/save_experience.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

@@ -17,7 +17,7 @@ export default function ImmunisationPage() {
     useEffect(() => {
         if (!user_id) return
 
-        fetch(`http://localhost/ndis-backend/controllers/get_immunisation.php?user_id=${user_id}`)
+        fetch(`http://54.206.186.109/ndis-backend/controllers/get_immunisation.php?user_id=${user_id}`)
             .then(res => res.json())
             .then(data => {
                 if (data.status === "success") {
@@ -41,7 +41,7 @@ export default function ImmunisationPage() {
         }
 
         try {
-            const res = await fetch("http://localhost/ndis-backend/controllers/save_immunisation.php", {
+            const res = await fetch("http://54.206.186.109/ndis-backend/controllers/save_immunisation.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

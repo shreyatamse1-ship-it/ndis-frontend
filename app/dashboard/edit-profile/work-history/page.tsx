@@ -27,7 +27,7 @@ export default function WorkHistoryPage() {
     useEffect(() => {
         if (!user_id) return
 
-        fetch(`http://localhost/ndis-backend/controllers/get_work_history.php?user_id=${user_id}`)
+        fetch(`http://54.206.186.109/ndis-backend/controllers/get_work_history.php?user_id=${user_id}`)
             .then(res => res.json())
             .then(data => {
                 if (data.status === "success" && data.jobs.length > 0) {
@@ -72,7 +72,7 @@ export default function WorkHistoryPage() {
         }
 
         try {
-            const res = await fetch("http://localhost/ndis-backend/controllers/save_work_history.php", {
+            const res = await fetch("http://54.206.186.109/ndis-backend/controllers/save_work_history.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
